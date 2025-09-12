@@ -1,0 +1,8 @@
+##################### FOR RUNNING ACTION AGENT MCP SERVER AND TEST APIs #################
+
+1. python mcp-servers/action_agent_server.py
+2. python mcp_wrapper.py
+
+
+
+
