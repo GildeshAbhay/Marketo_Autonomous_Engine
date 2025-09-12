@@ -1,0 +1,32 @@
+{
+    "version": "1.0",
+    "description": "A2A message schema for MCP servers and agent-to-agent (A2A) communication",
+    "message": {
+      "id": "string (uuid)", 
+      "timestamp": "int (epoch seconds)",
+      "from_agent": "string",
+      "to_agent": "string",
+      "type": "command | response | status | event",
+      "command": {
+        "name": "string (tool name e.g. get_campaign_details)",
+        "args": ["array", "of", "args"],
+        "kwargs": {
+          "example_kw": "value"
+        },
+        "safe_mode": true
+      },
+      "response": {
+        "status": "ok | error",
+        "code": "int (optional)",
+        "body": {}
+      },
+      "trace": [
+        {
+          "agent": "string",
+          "action": "string",
+          "ts": "int"
+        }
+      ]
+    }
+  }
+  
