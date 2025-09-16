@@ -18,6 +18,7 @@ try:
 except FileNotFoundError:
     cfg = {}
 
+cfg = cfg.get("settings", {})
 mcfg = cfg.get("marketo", {})
 identity_base = mcfg.get("identity_base") or os.environ.get("MARKETO_IDENTITY_BASE")
 rest_base = mcfg.get("rest_base") or os.environ.get("MARKETO_REST_BASE")
@@ -38,4 +39,4 @@ def get_smart_list(smart_list_id: int) -> dict:
 
 if __name__ == "__main__":
     # Run HTTP MCP server on port 8001
-    mcp.run(transport="http", host="127.0.0.1", port=8001)
+    mcp.run(transport="http", host="0.0.0.0", port=8001)

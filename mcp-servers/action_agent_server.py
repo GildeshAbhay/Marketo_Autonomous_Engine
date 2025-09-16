@@ -1,16 +1,36 @@
 """
 FastMCP server exposing ActionAgent as HTTP MCP tools.
-Run: python mcp_servers/action_agent_server.py
+
+Usage:
+    python mcp_servers/action_agent_server.py
+
+This starts a Starlette + Uvicorn server that exposes ActionAgent
+methods as MCP-compatible tools over Server-Sent Events (SSE).
+Your ADK Agent can then connect to: http://localhost:8002/sse
 """
+
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from fastmcp import FastMCP
-import os, yaml
-from marketo_client import MarketoClient
-from agents.action_agent import ActionAgent
+import yaml
+import uvicorn
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.routing import Route, Mount
 
-# Load config
+# Ensure repo root on sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from marketo_client import MarketoClient
+from agents.action_agent import ActionAgent  # ADK_AVAILABLE optional
+
+# Correct FastMCP import
+from mcp.server.fastmcp import FastMCP
+from mcp.server.sse import SseServerTransport
+
+# ------------------------------------------------------------------------------
+# Load configuration
+# ------------------------------------------------------------------------------
+
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "..", "config", "config.yaml")
 try:
     with open(CONFIG_PATH, "r") as fh:
@@ -19,33 +39,94 @@ except FileNotFoundError:
     cfg = {}
 
 mcfg = cfg.get("settings", {}).get("marketo", {})
+
 identity_base = mcfg.get("identity_base") or os.environ.get("MARKETO_IDENTITY_BASE")
 rest_base = mcfg.get("rest_base") or os.environ.get("MARKETO_REST_BASE")
 client_id = mcfg.get("client_id") or os.environ.get("MARKETO_CLIENT_ID")
 client_secret = mcfg.get("client_secret") or os.environ.get("MARKETO_CLIENT_SECRET")
+
 print("identity_base is", identity_base)
+
 marketo = MarketoClient(client_id, client_secret, identity_base, rest_base)
 agent = ActionAgent(marketo)
 
-if ADK_AVAILABLE:
-    adk_agent = make_adk_action_agent(marketo)  # Creates ADKAgent
-    # Wire ADK tools: Use ADK's tool registration to expose ActionAgent methods
-    adk_agent.add_tool(trigger_campaign)  # Adjust per ADK docs; e.g., adk_agent.tools.register(...)
+# ------------------------------------------------------------------------------
+# Create FastMCP and register tools
+# ------------------------------------------------------------------------------
 
 mcp = FastMCP(name="marketo-action-agent")
 
 @mcp.tool()
 def trigger_campaign(campaign_id: int, input_payload: dict) -> dict:
+    """
+    Trigger a Marketo campaign by ID.
+
+    Args:
+        campaign_id: The ID of the Marketo campaign.
+        input_payload: Dictionary of parameters to send.
+
+    Returns:
+        API response from Marketo.
+    """
     return agent.trigger_campaign(campaign_id, input_payload)
 
 @mcp.tool()
 def update_smart_list(smart_list_id: int, payload: dict) -> dict:
+    """
+    Update a Marketo Smart List.
+
+    Args:
+        smart_list_id: ID of the Smart List to update.
+        payload: Fields to update.
+
+    Returns:
+        API response from Marketo.
+    """
     return agent.update_smart_list(smart_list_id, payload)
 
 @mcp.tool()
 def get_campaign(campaign_id: str) -> dict:
+    """
+    Retrieve details about a specific Marketo campaign.
+
+    Args:
+        campaign_id: The campaign ID.
+
+    Returns:
+        Campaign details as a dictionary.
+    """
     return agent.get_campaign(campaign_id)
 
+# ------------------------------------------------------------------------------
+# SSE transport and Starlette app
+# ------------------------------------------------------------------------------
+
+# This must match the path in your ADK Agent (use /sse)
+sse = SseServerTransport("/messages/")
+
+async def handle_sse(request: Request) -> None:
+    """
+    Handle incoming SSE connection from an MCP client.
+    """
+    _server = mcp._mcp_server
+    async with sse.connect_sse(
+        request.scope,
+        request.receive,
+        request._send,
+    ) as (reader, writer):
+        await _server.run(reader, writer, _server.create_initialization_options())
+
+app = Starlette(
+    debug=True,
+    routes=[
+        Route("/sse", endpoint=handle_sse),  # <-- The endpoint your Agent connects to
+        Mount("/messages/", app=sse.handle_post_message),
+    ],
+)
+
+# ------------------------------------------------------------------------------
+# Run server
+# ------------------------------------------------------------------------------
+
 if __name__ == "__main__":
-    # Run HTTP MCP server on port 8002
-    mcp.run(transport="http", port=8002)
+    uvicorn.run(app, host="localhost", port=8002)
