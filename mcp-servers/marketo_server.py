@@ -20,8 +20,8 @@ from starlette.routing import Route, Mount
 # Ensure repo root on sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from marketo_client import MarketoClient
-from agents.action_agent import ActionAgent
+from utils.marketo_client import MarketoClient
+from utils.action_agent import ActionAgent
 
 # Correct FastMCP import
 from fastmcp import FastMCP
@@ -96,6 +96,15 @@ def get_campaign(campaign_id: str) -> dict:
         Campaign details as a dictionary.
     """
     return agent.get_campaign(campaign_id)
+
+# ToDo: Added in Future
+# @mcp.tool()
+# def get_campaign_details(campaign_id: int) -> dict:
+#     return agent.get_campaign_details(campaign_id)
+
+# @mcp.tool()
+# def get_smart_list(smart_list_id: int) -> dict:
+#     return agent.get_smart_list(smart_list_id)
 
 # ------------------------------------------------------------------------------
 # SSE transport and Starlette app (FIXED)

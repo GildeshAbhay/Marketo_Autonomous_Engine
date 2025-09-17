@@ -2,7 +2,7 @@
 ActionAgent: encapsulates Marketo write/trigger operations. Keep actions idempotent and add safety checks.
 """
 from typing import Any, Dict
-from marketo_client import MarketoClient
+from .marketo_client import MarketoClient
 
 try:
     from google.adk import Agent as ADKAgent # type: ignore
