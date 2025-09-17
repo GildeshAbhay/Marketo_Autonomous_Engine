@@ -4,7 +4,7 @@ from fastmcp import Client
 
 async def test_mcp():
     # Connect to your server (trailing slash optional; client handles it)
-    client = Client("http://localhost:8002/mcp")
+    client = Client("http://localhost:8002/sse")
     async with client:
         # Step 1: Ping the server (basic connectivity)
         await client.ping()

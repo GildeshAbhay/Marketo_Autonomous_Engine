@@ -21,7 +21,7 @@ from starlette.routing import Route, Mount
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from marketo_client import MarketoClient
-from agents.action_agent import ActionAgent  # ADK_AVAILABLE optional
+from agents.action_agent import ActionAgent
 
 # Correct FastMCP import
 from fastmcp import FastMCP
@@ -49,6 +49,7 @@ print("identity_base is", identity_base)
 
 marketo = MarketoClient(client_id, client_secret, identity_base, rest_base)
 agent = ActionAgent(marketo)
+
 # ------------------------------------------------------------------------------
 # Create FastMCP and register tools
 # ------------------------------------------------------------------------------
@@ -94,39 +95,40 @@ def get_campaign(campaign_id: str) -> dict:
     Returns:
         Campaign details as a dictionary.
     """
-    # agent.get_campaign(campaign_id)
     return agent.get_campaign(campaign_id)
 
 # ------------------------------------------------------------------------------
-# SSE transport and Starlette app
+# SSE transport and Starlette app (FIXED)
 # ------------------------------------------------------------------------------
 
-# This must match the path in your ADK Agent (use /sse)
-# sse = SseServerTransport("/messages/")
+# Create SSE transport with the correct endpoint
+sse = SseServerTransport("/messages")
 
-# async def handle_sse(request: Request) -> None:
-#     """
-#     Handle incoming SSE connection from an MCP client.
-#     """
-#     _server = mcp._mcp_server
-#     async with sse.connect_sse(
-#         request.scope,
-#         request.receive,
-#         request._send,
-#     ) as (reader, writer):
-#         await _server.run(reader, writer, _server.create_initialization_options())
+async def handle_sse(request: Request):
+    """
+    Handle incoming SSE connection from an MCP client.
+    """
+    _server = mcp._mcp_server
+    async with sse.connect_sse(
+        request.scope,
+        request.receive,
+        request._send,
+    ) as (reader, writer):
+        await _server.run(reader, writer, _server.create_initialization_options())
 
-# app = Starlette(
-#     debug=True,
-#     routes=[
-#         Route("/sse", endpoint=handle_sse),  # <-- The endpoint your Agent connects to
-#         Mount("/messages/", app=sse.handle_post_message),
-#     ],
-# )
+# Create Starlette app with proper routes
+app = Starlette(
+    debug=True,
+    routes=[
+        Route("/sse", endpoint=handle_sse, methods=["GET"]),  # SSE endpoint
+        Mount("/messages", app=sse.handle_post_message),      # Message handling
+    ],
+)
 
 # ------------------------------------------------------------------------------
 # Run server
 # ------------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    mcp.run(transport="http",host="localhost", port=8002)
+    # Use uvicorn directly instead of mcp.run() for better control
+    uvicorn.run(app, host="localhost", port=8002, log_level="info")
