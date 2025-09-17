@@ -1,6 +1,7 @@
 import asyncio
 from fastmcp import Client
 
+
 async def test_mcp():
     # Connect to your server (trailing slash optional; client handles it)
     client = Client("http://localhost:8002/mcp")

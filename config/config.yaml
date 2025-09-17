@@ -3,7 +3,7 @@ settings:
     client_id: fff42691-2f2f-41d6-be4a-b716dee7da0b
     client_secret: 1zYcM4Jd2C8LWzClw9vQC4DZ65F9XV2F
     identity_base: https://196-UQU-425.mktorest.com/identity
-    rest_base: https://196-UQU-425.mktorest.com
+    rest_base: https://196-UQU-425.mktorest.com/rest
 
   mcp:
     data_agent_port: 8001
