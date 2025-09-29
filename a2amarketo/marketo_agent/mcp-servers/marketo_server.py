@@ -6,7 +6,7 @@ Usage:
 
 This starts a Starlette + Uvicorn server that exposes ActionAgent
 methods as MCP-compatible tools over Server-Sent Events (SSE).
-Your ADK Agent can then connect to: http://localhost:8000/sse
+Your ADK Agent can then connect to: http://localhost:8002/sse
 """
 
 import sys
@@ -140,4 +140,4 @@ app = Starlette(
 
 if __name__ == "__main__":
     # Use uvicorn directly instead of mcp.run() for better control
-    uvicorn.run(app, host="localhost", port=8000, log_level="info")
+    uvicorn.run(app, host="localhost", port=8002, log_level="info")

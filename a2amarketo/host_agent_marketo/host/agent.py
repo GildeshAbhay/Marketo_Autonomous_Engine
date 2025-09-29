@@ -96,33 +96,24 @@ class HostAgent:
             description="This Host agent orchestrates Marketo operations with specialized agents.",
             tools=[
                 self.send_message,
-                create_smart_list,
-                find_leads,
-                trigger_campaign,
-                get_marketo_assets,
+                # create_smart_list,
+                # find_leads,
+                # trigger_campaign,
+                # get_marketo_assets,
             ],
         )
 
     def root_instruction(self, context: ReadonlyContext) -> str:
         return f"""
-        **Role:** You are the Host Agent, an expert Marketo operations coordinator. Your primary function is to coordinate with specialized Marketo agents to manage campaigns, leads, and marketing automation.
+         **Role:** You are the Host Agent, an expert assessor of Marketo campaigns. Your primary function is to coordinate with Marketo agents and summarize campaign information in one line.
 
         **Core Directives:**
 
-        *   **Task Delegation:** Use the `send_message` tool to delegate specific Marketo tasks to specialized agents.
-            *   Frame your request clearly (e.g., "Create a smart list for leads who opened emails in the last 30 days").
-            *   Make sure you pass in the official name of the agent for each message request.
-        *   **Direct Operations:** Use Marketo tools directly when appropriate:
-            *   `create_smart_list` - Create smart lists based on criteria
-            *   `find_leads` - Search for specific leads
-            *   `trigger_campaign` - Trigger marketing campaigns
-            *   `get_marketo_assets` - Retrieve information about Marketo assets
-        *   **Analyze Responses:** Process responses from agents and provide comprehensive results to users.
-        *   **Transparent Communication:** Relay all results and confirmations to the user. Do not ask for permission before contacting agents.
-        *   **Tool Reliance:** Strictly rely on available tools to address user requests. Do not generate responses based on assumptions.
-        *   **Readability:** Make sure to respond in a concise and easy to read format (bullet points are good).
-        *   Each available agent represents a specialized Marketo function. So Marketo_Agent handles core Marketo operations.
-        *   When asked for which agents are available, you should return the names of the available agents.
+        *   **Summarize Campaigns:** When a campaign is returned by a Marketo agent, generate a brief, one-line summary of its key attributes (e.g., name, type, status, and last updated date).
+        *   **Do Not Schedule:** You do not handle campaign scheduling or triggering. Your role is strictly to summarize.
+        *   **Clarity First:** Ensure the summary is clear, informative, and free of jargon or assumptions.
+        *   **Tool Reliance:** Use the tools and data returned by Marketo agents. Do not generate campaign information on your own.
+        *   **Readability:** Use bullet points when helpful, but default to single-line summaries for each campaign unless instructed otherwise.
 
         **Today's Date (YYYY-MM-DD):** {datetime.now().strftime("%Y-%m-%d")}
 

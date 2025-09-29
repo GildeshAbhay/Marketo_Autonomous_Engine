@@ -47,29 +47,39 @@ class MarketoAgentExecutor(AgentExecutor):
         session_obj = await self._upsert_session(session_id)
         session_id = session_obj.id
 
-        async for event in self._run_agent(session_id, new_message):
-            if event.is_final_response():
-                parts = convert_genai_parts_to_a2a(
-                    event.content.parts if event.content and event.content.parts else []
-                )
-                logger.debug("Yielding final response: %s", parts)
-                task_updater.add_artifact(parts)
-                task_updater.complete()
-                break
-            if not event.get_function_calls():
-                logger.debug("Yielding update response")
-                task_updater.update_status(
-                    TaskState.working,
-                    message=task_updater.new_agent_message(
-                        convert_genai_parts_to_a2a(
-                            event.content.parts
-                            if event.content and event.content.parts
-                            else []
+        try:
+            async for event in self._run_agent(session_id, new_message):
+                if event.is_final_response():
+                    parts = convert_genai_parts_to_a2a(
+                        event.content.parts if event.content and event.content.parts else []
+                    )
+                    logger.debug("Yielding final response: %s", parts)
+                    task_updater.add_artifact(parts)
+                    task_updater.complete()
+                    break
+                if not event.get_function_calls():
+                    logger.debug("Yielding update response")
+                    task_updater.update_status(
+                        TaskState.working,
+                        message=task_updater.new_agent_message(
+                            convert_genai_parts_to_a2a(
+                                event.content.parts
+                                if event.content and event.content.parts
+                                else []
+                            ),
                         ),
-                    ),
-                )
-            else:
-                logger.debug("Skipping event")
+                    )
+                else:
+                    logger.debug("Skipping event with function calls")
+        except Exception as e:
+            logger.error(f"Error processing request: {e}")
+            task_updater.update_status(
+                TaskState.failed,
+                message=task_updater.new_agent_message([
+                    Part(root=TextPart(text=f"Error processing request: {str(e)}"))
+                ]),
+            )
+            raise
 
     async def execute(
         self,
@@ -81,10 +91,27 @@ class MarketoAgentExecutor(AgentExecutor):
         if not context.message:
             raise ValueError("RequestContext must have a message")
 
+        logger.debug(f"Starting execution with task_id: {context.task_id}, context_id: {context.context_id}")
+        logger.debug(f"Current task exists: {context.current_task is not None}")
+
         updater = TaskUpdater(event_queue, context.task_id, context.context_id)
         if not context.current_task:
-            updater.submit()
-        updater.start_work()
+            logger.debug("Submitting new task")
+            try:
+                updater.submit()
+                logger.debug("Task submitted successfully")
+            except Exception as e:
+                logger.error(f"Failed to submit task: {e}")
+                raise
+        
+        logger.debug("Starting work on task")
+        try:
+            updater.start_work()
+            logger.debug("Task work started successfully")
+        except Exception as e:
+            logger.error(f"Failed to start work on task: {e}")
+            raise
+
         await self._process_request(
             types.UserContent(
                 parts=convert_a2a_parts_to_genai(context.message.parts),

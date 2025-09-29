@@ -48,10 +48,10 @@ def main():
             name="Marketo Operations",
             description="Manages Marketo campaigns, smart lists, leads, and other marketing automation tasks.",
             tags=["marketo", "marketing", "automation"],
-            examples=["Show me all campaigns", "Create a smart list for high-value leads", "Find leads with score above 80"],
+            examples=["Show me all campaigns", "Create a smart list for high-value leads", "Find leads with score above 80" , "give me the details for campaign id 4567"],
         )
         agent_card = AgentCard(
-            name="Marketo Agent",
+            name="Marketo Campaign Agent",
             description="An agent that manages Marketo campaigns, smart lists, leads, and marketing automation.",
             url=f"http://{host}:{port}/",
             version="1.0.0",

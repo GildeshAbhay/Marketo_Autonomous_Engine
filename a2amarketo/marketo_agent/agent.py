@@ -1,139 +1,141 @@
 import os
 from typing import Dict, List, Any
 import json
-
+from google.adk.agents import Agent
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
+from google.adk.tools.mcp_tool.mcp_session_manager import SseServerParams
 from google.adk.agents import LlmAgent
 from marketo_client import MarketoClient
 
-# Initialize Marketo client
-def get_marketo_client() -> MarketoClient:
-    """Initialize Marketo client from environment variables."""
-    client_id = os.getenv("MARKETO_CLIENT_ID")
-    client_secret = os.getenv("MARKETO_CLIENT_SECRET")
-    identity_base = os.getenv("MARKETO_IDENTITY_BASE")
-    rest_base = os.getenv("MARKETO_REST_BASE")
+# # Initialize Marketo client
+# def get_marketo_client() -> MarketoClient:
+#     """Initialize Marketo client from environment variables."""
+#     client_id = os.getenv("MARKETO_CLIENT_ID")
+#     client_secret = os.getenv("MARKETO_CLIENT_SECRET")
+#     identity_base = os.getenv("MARKETO_IDENTITY_BASE")
+#     rest_base = os.getenv("MARKETO_REST_BASE")
     
-    if not all([client_id, client_secret, identity_base, rest_base]):
-        raise ValueError("Missing required Marketo environment variables: MARKETO_CLIENT_ID, MARKETO_CLIENT_SECRET, MARKETO_IDENTITY_BASE, MARKETO_REST_BASE")
+#     if not all([client_id, client_secret, identity_base, rest_base]):
+#         raise ValueError("Missing required Marketo environment variables: MARKETO_CLIENT_ID, MARKETO_CLIENT_SECRET, MARKETO_IDENTITY_BASE, MARKETO_REST_BASE")
     
-    return MarketoClient(client_id, client_secret, identity_base, rest_base)
+#     return MarketoClient(client_id, client_secret, identity_base, rest_base)
 
 
-def get_marketo_campaigns() -> str:
-    """
-    Retrieves information about Marketo campaigns.
+# def get_marketo_campaigns() -> str:
+#     """
+#     Retrieves information about Marketo campaigns.
     
-    Returns:
-        A string containing campaign information.
-    """
-    try:
-        client = get_marketo_client()
-        response = client.get_campaigns()
+#     Returns:
+#         A string containing campaign information.
+#     """
+#     try:
+#         client = get_marketo_client()
+#         response = client.get_campaigns()
         
-        if not response.get("result"):
-            return "No campaigns found in Marketo."
+#         if not response.get("result"):
+#             return "No campaigns found in Marketo."
         
-        campaigns = response["result"]
-        result = "Available Marketo Campaigns:\n"
-        for campaign in campaigns:
-            result += f"• {campaign.get('name', 'Unknown')} (ID: {campaign.get('id', 'Unknown')}) - Status: {campaign.get('status', 'Unknown')}\n"
+#         campaigns = response["result"]
+#         result = "Available Marketo Campaigns:\n"
+#         for campaign in campaigns:
+#             result += f"• {campaign.get('name', 'Unknown')} (ID: {campaign.get('id', 'Unknown')}) - Status: {campaign.get('status', 'Unknown')}\n"
         
-        return result
-    except Exception as e:
-        return f"Error retrieving campaigns: {str(e)}"
+#         return result
+#     except Exception as e:
+#         return f"Error retrieving campaigns: {str(e)}"
 
 
-def get_marketo_smart_lists() -> str:
-    """
-    Retrieves information about Marketo smart lists.
+# def get_marketo_smart_lists() -> str:
+#     """
+#     Retrieves information about Marketo smart lists.
     
-    Returns:
-        A string containing smart list information.
-    """
-    try:
-        client = get_marketo_client()
-        response = client.get_smart_lists()
+#     Returns:
+#         A string containing smart list information.
+#     """
+#     try:
+#         client = get_marketo_client()
+#         response = client.get_smart_lists()
         
-        if not response.get("result"):
-            return "No smart lists found in Marketo."
+#         if not response.get("result"):
+#             return "No smart lists found in Marketo."
         
-        smart_lists = response["result"]
-        result = "Available Marketo Smart Lists:\n"
-        for sl in smart_lists:
-            result += f"• {sl.get('name', 'Unknown')} (ID: {sl.get('id', 'Unknown')}) - Description: {sl.get('description', 'No description')}\n"
+#         smart_lists = response["result"]
+#         result = "Available Marketo Smart Lists:\n"
+#         for sl in smart_lists:
+#             result += f"• {sl.get('name', 'Unknown')} (ID: {sl.get('id', 'Unknown')}) - Description: {sl.get('description', 'No description')}\n"
         
-        return result
-    except Exception as e:
-        return f"Error retrieving smart lists: {str(e)}"
+#         return result
+#     except Exception as e:
+#         return f"Error retrieving smart lists: {str(e)}"
 
 
-def get_marketo_leads(filter_type: str = "email", filter_values: str = "") -> str:
-    """
-    Retrieves information about Marketo leads.
+# def get_marketo_leads(filter_type: str = "email", filter_values: str = "") -> str:
+#     """
+#     Retrieves information about Marketo leads.
     
-    Args:
-        filter_type: Type of filter to apply (email, id, etc.).
-        filter_values: Comma-separated values to filter by.
+#     Args:
+#         filter_type: Type of filter to apply (email, id, etc.).
+#         filter_values: Comma-separated values to filter by.
     
-    Returns:
-        A string containing lead information.
-    """
-    try:
-        client = get_marketo_client()
+#     Returns:
+#         A string containing lead information.
+#     """
+#     try:
+#         client = get_marketo_client()
         
-        # Parse filter values
-        filter_list = [v.strip() for v in filter_values.split(",") if v.strip()] if filter_values else []
+#         # Parse filter values
+#         filter_list = [v.strip() for v in filter_values.split(",") if v.strip()] if filter_values else []
         
-        if filter_list:
-            response = client.get_leads(filter_type=filter_type, filter_values=filter_list)
-        else:
-            # Get all leads (this might be limited by Marketo API)
-            response = client.get_leads()
+#         if filter_list:
+#             response = client.get_leads(filter_type=filter_type, filter_values=filter_list)
+#         else:
+#             # Get all leads (this might be limited by Marketo API)
+#             response = client.get_leads()
         
-        if not response.get("result"):
-            return "No leads found in Marketo."
+#         if not response.get("result"):
+#             return "No leads found in Marketo."
         
-        leads = response["result"]
-        result = f"Marketo Leads (filter: {filter_type}={filter_values}):\n"
-        for lead in leads:
-            result += f"• {lead.get('email', 'No email')} - ID: {lead.get('id', 'Unknown')} - Company: {lead.get('company', 'Unknown')}\n"
+#         leads = response["result"]
+#         result = f"Marketo Leads (filter: {filter_type}={filter_values}):\n"
+#         for lead in leads:
+#             result += f"• {lead.get('email', 'No email')} - ID: {lead.get('id', 'Unknown')} - Company: {lead.get('company', 'Unknown')}\n"
         
-        return result
-    except Exception as e:
-        return f"Error retrieving leads: {str(e)}"
+#         return result
+#     except Exception as e:
+#         return f"Error retrieving leads: {str(e)}"
 
 
-def create_marketo_smart_list(name: str, description: str, folder_id: int = 1) -> str:
-    """
-    Creates a new smart list in Marketo.
+# def create_marketo_smart_list(name: str, description: str, folder_id: int = 1) -> str:
+#     """
+#     Creates a new smart list in Marketo.
     
-    Args:
-        name: Name of the smart list.
-        description: Description of the smart list.
-        folder_id: ID of the folder to create the smart list in (default: 1).
+#     Args:
+#         name: Name of the smart list.
+#         description: Description of the smart list.
+#         folder_id: ID of the folder to create the smart list in (default: 1).
     
-    Returns:
-        A string confirming the smart list creation.
-    """
-    try:
-        client = get_marketo_client()
-        response = client.create_smart_list(name, description, folder_id)
+#     Returns:
+#         A string confirming the smart list creation.
+#     """
+#     try:
+#         client = get_marketo_client()
+#         response = client.create_smart_list(name, description, folder_id)
         
-        if response.get("result"):
-            smart_list = response["result"][0]  # Marketo returns array
-            return f"Successfully created smart list '{name}' with ID {smart_list.get('id', 'Unknown')}. Description: {description}"
-        else:
-            return f"Failed to create smart list: {response.get('errors', 'Unknown error')}"
+#         if response.get("result"):
+#             smart_list = response["result"][0]  # Marketo returns array
+#             return f"Successfully created smart list '{name}' with ID {smart_list.get('id', 'Unknown')}. Description: {description}"
+#         else:
+#             return f"Failed to create smart list: {response.get('errors', 'Unknown error')}"
         
-    except Exception as e:
-        return f"Error creating smart list: {str(e)}"
+#     except Exception as e:
+#         return f"Error creating smart list: {str(e)}"
 
 
 def create_agent() -> LlmAgent:
     """Constructs the ADK agent for Marketo operations."""
     return LlmAgent(
         model="gemini-2.5-flash",
-        name="Marketo_Agent",
+        name="Marketo_Campaign_Agent",
         instruction="""
             **Role:** You are a Marketo operations assistant. 
             Your primary responsibility is to help users manage their Marketo instance 
@@ -141,21 +143,22 @@ def create_agent() -> LlmAgent:
 
             **Core Directives:**
 
-            *   **Campaign Management:** Use the `get_marketo_campaigns` tool to retrieve 
-                    information about existing campaigns, their status, and lead counts.
-            *   **Smart List Operations:** Use the `get_marketo_smart_lists` tool to view 
-                    existing smart lists and the `create_marketo_smart_list` tool to create new ones.
-            *   **Lead Management:** Use the `get_marketo_leads` tool to search and filter leads 
-                    based on email, ID, or other criteria.
+            *   **Campaign Management:** Use the available tools to retrieve 
+                    information about existing campaigns, their status, and details.
+            *   **Smart List Operations:** Use the available tools to view 
+                    existing smart lists and create or update them as needed.
+            *   **Lead Management:** Use the available tools to search and filter leads 
+                    based on various criteria.
             *   **Polite and Concise:** Always be polite and to the point in your responses.
             *   **Stick to Your Role:** Focus on Marketo operations. If asked about other topics, 
                     politely state that you can only help with Marketo-related tasks.
             *   **Data Accuracy:** Provide accurate information based on the available tools.
+            *   **Error Handling:** If tools return errors, explain the issue clearly to the user.
         """,
-        tools=[
-            get_marketo_campaigns,
-            get_marketo_smart_lists,
-            get_marketo_leads,
-            create_marketo_smart_list,
-        ],
+        tools=[MCPToolset(
+            connection_params=SseServerParams(
+                url="http://localhost:8002/sse",  # Connect to your FastMCP server via HTTP/SSE
+            )
+        )],
     )
+
