@@ -25,9 +25,11 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.tools.tool_context import ToolContext
 from google.genai import types
 
-from .pickleball_tools import (
-    book_pickleball_court,
-    list_court_availabilities,
+from .marketo_tools import (
+    create_smart_list,
+    find_leads,
+    trigger_campaign,
+    get_marketo_assets,
 )
 from .remote_agent_connection import RemoteAgentConnections
 
@@ -91,34 +93,36 @@ class HostAgent:
             model="gemini-2.5-flash",
             name="Host_Agent",
             instruction=self.root_instruction,
-            description="This Host agent orchestrates scheduling pickleball with friends.",
+            description="This Host agent orchestrates Marketo operations with specialized agents.",
             tools=[
                 self.send_message,
-                book_pickleball_court,
-                list_court_availabilities,
+                create_smart_list,
+                find_leads,
+                trigger_campaign,
+                get_marketo_assets,
             ],
         )
 
     def root_instruction(self, context: ReadonlyContext) -> str:
         return f"""
-        **Role:** You are the Host Agent, an expert scheduler for pickleball games. Your primary function is to coordinate with friend agents to find a suitable time to play and then book a court.
+        **Role:** You are the Host Agent, an expert Marketo operations coordinator. Your primary function is to coordinate with specialized Marketo agents to manage campaigns, leads, and marketing automation.
 
         **Core Directives:**
 
-        *   **Initiate Planning:** When asked to schedule a game, first determine who to invite and the desired date range from the user.
-        *   **Task Delegation:** Use the `send_message` tool to ask each friend for their availability.
-            *   Frame your request clearly (e.g., "Are you available for pickleball between 2024-08-01 and 2024-08-03?").
-            *   Make sure you pass in the official name of the friend agent for each message request.
-        *   **Analyze Responses:** Once you have availability from all friends, analyze the responses to find common timeslots.
-        *   **Check Court Availability:** Before proposing times to the user, use the `list_court_availabilities` tool to ensure the court is also free at the common timeslots.
-        *   **Propose and Confirm:** Present the common, court-available timeslots to the user for confirmation.
-        *   **Book the Court:** After the user confirms a time, use the `book_pickleball_court` tool to make the reservation. This tool requires a `start_time` and an `end_time`.
-        *   **Transparent Communication:** Relay the final booking confirmation, including the booking ID, to the user. Do not ask for permission before contacting friend agents.
+        *   **Task Delegation:** Use the `send_message` tool to delegate specific Marketo tasks to specialized agents.
+            *   Frame your request clearly (e.g., "Create a smart list for leads who opened emails in the last 30 days").
+            *   Make sure you pass in the official name of the agent for each message request.
+        *   **Direct Operations:** Use Marketo tools directly when appropriate:
+            *   `create_smart_list` - Create smart lists based on criteria
+            *   `find_leads` - Search for specific leads
+            *   `trigger_campaign` - Trigger marketing campaigns
+            *   `get_marketo_assets` - Retrieve information about Marketo assets
+        *   **Analyze Responses:** Process responses from agents and provide comprehensive results to users.
+        *   **Transparent Communication:** Relay all results and confirmations to the user. Do not ask for permission before contacting agents.
         *   **Tool Reliance:** Strictly rely on available tools to address user requests. Do not generate responses based on assumptions.
         *   **Readability:** Make sure to respond in a concise and easy to read format (bullet points are good).
-        *   Each available agent represents a friend. So Bob_Agent represents Bob.
-        *   When asked for which friends are available, you should return the names of the available friends (aka the agents that are active).
-        *   When get
+        *   Each available agent represents a specialized Marketo function. So Marketo_Agent handles core Marketo operations.
+        *   When asked for which agents are available, you should return the names of the available agents.
 
         **Today's Date (YYYY-MM-DD):** {datetime.now().strftime("%Y-%m-%d")}
 
@@ -221,16 +225,15 @@ def _get_initialized_host_agent_sync():
     """Synchronously creates and initializes the HostAgent."""
 
     async def _async_main():
-        # Hardcoded URLs for the friend agents
-        friend_agent_urls = [
-            "http://localhost:10002",  # Karley's Agent
-            "http://localhost:10003",  # Nate's Agent
-            "http://localhost:10004",  # Kaitlynn's Agent
+        # Hardcoded URLs for the Marketo agents
+        marketo_agent_urls = [
+            "http://localhost:10002",  # Marketo Agent
+            "http://localhost:10003",  # Web Search Agent
         ]
 
         print("initializing host agent")
         hosting_agent_instance = await HostAgent.create(
-            remote_agent_addresses=friend_agent_urls
+            remote_agent_addresses=marketo_agent_urls
         )
         print("HostAgent initialized")
         return hosting_agent_instance.create_agent()

@@ -11,7 +11,7 @@ from a2a.types import (
     AgentSkill,
 )
 from agent import create_agent
-from agent_executor import KarleyAgentExecutor
+from agent_executor import MarketoAgentExecutor
 from dotenv import load_dotenv
 from google.adk.artifacts import InMemoryArtifactService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
@@ -44,15 +44,15 @@ def main():
 
         capabilities = AgentCapabilities(streaming=True)
         skill = AgentSkill(
-            id="check_schedule",
-            name="Check Karley's Schedule",
-            description="Checks Karley's availability for a pickleball game on a given date.",
-            tags=["scheduling", "calendar"],
-            examples=["Is Karley free to play pickleball tomorrow?"],
+            id="marketo_operations",
+            name="Marketo Operations",
+            description="Manages Marketo campaigns, smart lists, leads, and other marketing automation tasks.",
+            tags=["marketo", "marketing", "automation"],
+            examples=["Show me all campaigns", "Create a smart list for high-value leads", "Find leads with score above 80"],
         )
         agent_card = AgentCard(
-            name="Karley Agent",
-            description="An agent that manages Karley's schedule for pickleball games.",
+            name="Marketo Agent",
+            description="An agent that manages Marketo campaigns, smart lists, leads, and marketing automation.",
             url=f"http://{host}:{port}/",
             version="1.0.0",
             defaultInputModes=["text/plain"],
@@ -69,7 +69,7 @@ def main():
             session_service=InMemorySessionService(),
             memory_service=InMemoryMemoryService(),
         )
-        agent_executor = KarleyAgentExecutor(runner)
+        agent_executor = MarketoAgentExecutor(runner)
 
         request_handler = DefaultRequestHandler(
             agent_executor=agent_executor,
