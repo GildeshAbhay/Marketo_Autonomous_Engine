@@ -105,21 +105,28 @@ class HostAgent:
 
     def root_instruction(self, context: ReadonlyContext) -> str:
         return f"""
-         **Role:** You are the Host Agent, an expert assessor of Marketo campaigns. Your primary function is to coordinate with Marketo agents and summarize campaign information in one line.
+         **Role:** You are the Host Agent, an expert coordinator for Marketo operations. Your primary function is to delegate requests to specialized Marketo agents and provide clear summaries.
 
         **Core Directives:**
 
-        *   **Summarize Campaigns:** When a campaign is returned by a Marketo agent, generate a brief, one-line summary of its key attributes (e.g., name, type, status, and last updated date).
-        *   **Do Not Schedule:** You do not handle campaign scheduling or triggering. Your role is strictly to summarize.
-        *   **Clarity First:** Ensure the summary is clear, informative, and free of jargon or assumptions.
-        *   **Tool Reliance:** Use the tools and data returned by Marketo agents. Do not generate campaign information on your own.
-        *   **Readability:** Use bullet points when helpful, but default to single-line summaries for each campaign unless instructed otherwise.
+        *   **Delegate to Agents:** When users ask for Marketo information (campaigns, smart lists, leads), use the send_message tool to communicate with the appropriate agent.
+        *   **Agent Communication:** Use send_message with agent_name "Marketo Campaign Agent" for all Marketo-related requests.
+        *   **Summarize Results:** When agents return data, provide clear, concise summaries.
+        *   **Handle Errors:** If agents return errors, explain the issue clearly to the user.
+        *   **Tool Usage:** Always use the send_message tool to get information from Marketo agents. Do not generate Marketo data on your own.
+
+        **Available Tools:**
+        - send_message(agent_name, task, tool_context): Send requests to specialized agents
 
         **Today's Date (YYYY-MM-DD):** {datetime.now().strftime("%Y-%m-%d")}
 
         <Available Agents>
         {self.agents}
         </Available Agents>
+
+        **Example Usage:**
+        User: "get me the campaign detail for id 4567"
+        You should: send_message("Marketo Campaign Agent", "get me the campaign detail for id 4567", tool_context)
         """
 
     async def stream(
@@ -173,12 +180,16 @@ class HostAgent:
         if not client:
             raise ValueError(f"Client not available for {agent_name}")
 
-        # Simplified task and context ID management
+        # Generate unique IDs for this request
+        # task_id = str(uuid.uuid4())
+        # context_id = str(uuid.uuid4())
+        # message_id = str(uuid.uuid4())
+
         state = tool_context.state
         task_id = state.get("task_id", str(uuid.uuid4()))
         context_id = state.get("context_id", str(uuid.uuid4()))
         message_id = str(uuid.uuid4())
-
+        
         payload = {
             "message": {
                 "role": "user",
@@ -192,24 +203,42 @@ class HostAgent:
         message_request = SendMessageRequest(
             id=message_id, params=MessageSendParams.model_validate(payload)
         )
-        send_response: SendMessageResponse = await client.send_message(message_request)
-        print("send_response", send_response)
+        
+        try:
+            send_response: SendMessageResponse = await client.send_message(message_request)
+            print(f"send_response root type: {type(send_response.root)}")
+            print(f"send_response: {send_response}")
 
-        if not isinstance(
-            send_response.root, SendMessageSuccessResponse
-        ) or not isinstance(send_response.root.result, Task):
-            print("Received a non-success or non-task response. Cannot proceed.")
-            return
+            if not isinstance(send_response.root, SendMessageSuccessResponse):
+                error_msg = f"Received a non-success response: {send_response.root}"
+                print(error_msg)
+                return [{"error": error_msg}]
 
-        response_content = send_response.root.model_dump_json(exclude_none=True)
-        json_content = json.loads(response_content)
+            if not isinstance(send_response.root.result, Task):
+                error_msg = f"Response result is not a Task: {type(send_response.root.result)}"
+                print(error_msg)
+                return [{"error": error_msg}]
 
-        resp = []
-        if json_content.get("result", {}).get("artifacts"):
-            for artifact in json_content["result"]["artifacts"]:
-                if artifact.get("parts"):
-                    resp.extend(artifact["parts"])
-        return resp
+            task_result = send_response.root.result
+            response_content = task_result.model_dump_json(exclude_none=True)
+            json_content = json.loads(response_content)
+
+            resp = []
+            if json_content.get("artifacts"):
+                for artifact in json_content["artifacts"]:
+                    if artifact.get("parts"):
+                        for part in artifact["parts"]:
+                            if part.get("text"):
+                                resp.append({"text": part["text"]})
+                            else:
+                                resp.append(part)
+            
+            return resp if resp else [{"message": "Task completed successfully but no content returned"}]
+            
+        except Exception as e:
+            error_msg = f"Error sending message to {agent_name}: {str(e)}"
+            print(error_msg)
+            return [{"error": error_msg}]
 
 
 def _get_initialized_host_agent_sync():
@@ -219,7 +248,7 @@ def _get_initialized_host_agent_sync():
         # Hardcoded URLs for the Marketo agents
         marketo_agent_urls = [
             "http://localhost:10002",  # Marketo Agent
-            "http://localhost:10003",  # Web Search Agent
+            # "http://localhost:10003",  # Web Search Agent
         ]
 
         print("initializing host agent")
