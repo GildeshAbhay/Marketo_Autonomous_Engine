@@ -180,23 +180,16 @@ class HostAgent:
         if not client:
             raise ValueError(f"Client not available for {agent_name}")
 
-        # Generate unique IDs for this request
-        # task_id = str(uuid.uuid4())
-        # context_id = str(uuid.uuid4())
-        # message_id = str(uuid.uuid4())
-
-        state = tool_context.state
-        task_id = state.get("task_id", str(uuid.uuid4()))
-        context_id = state.get("context_id", str(uuid.uuid4()))
+        # Generate unique message ID for this request
         message_id = str(uuid.uuid4())
         
+        # FIXED: Don't include taskId and contextId - let the remote agent create them
         payload = {
             "message": {
                 "role": "user",
                 "parts": [{"type": "text", "text": task}],
                 "messageId": message_id,
-                "taskId": task_id,
-                "contextId": context_id,
+                # Removed: "taskId" and "contextId"
             },
         }
 
@@ -222,7 +215,7 @@ class HostAgent:
             task_result = send_response.root.result
             response_content = task_result.model_dump_json(exclude_none=True)
             json_content = json.loads(response_content)
-
+            print(f"json_content after task result: {json_content}")
             resp = []
             if json_content.get("artifacts"):
                 for artifact in json_content["artifacts"]:
@@ -248,7 +241,7 @@ def _get_initialized_host_agent_sync():
         # Hardcoded URLs for the Marketo agents
         marketo_agent_urls = [
             "http://localhost:10002",  # Marketo Agent
-            # "http://localhost:10003",  # Web Search Agent
+             "http://localhost:10003",  # Web Search Agent
         ]
 
         print("initializing host agent")

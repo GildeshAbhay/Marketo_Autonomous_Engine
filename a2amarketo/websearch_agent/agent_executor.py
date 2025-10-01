@@ -53,12 +53,12 @@ class WebSearchAgentExecutor(AgentExecutor):
                     event.content.parts if event.content and event.content.parts else []
                 )
                 logger.debug("Yielding final response: %s", parts)
-                task_updater.add_artifact(parts)
-                task_updater.complete()
+                await task_updater.add_artifact(parts)  # FIXED: Added await
+                await task_updater.complete()  # FIXED: Added await
                 break
             if not event.get_function_calls():
                 logger.debug("Yielding update response")
-                task_updater.update_status(
+                await task_updater.update_status(  # FIXED: Added await
                     TaskState.working,
                     message=task_updater.new_agent_message(
                         convert_genai_parts_to_a2a(
@@ -83,8 +83,8 @@ class WebSearchAgentExecutor(AgentExecutor):
 
         updater = TaskUpdater(event_queue, context.task_id, context.context_id)
         if not context.current_task:
-            updater.submit()
-        updater.start_work()
+            await updater.submit()  # FIXED: Added await
+        await updater.start_work()  # FIXED: Added await
         await self._process_request(
             types.UserContent(
                 parts=convert_a2a_parts_to_genai(context.message.parts),

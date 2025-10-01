@@ -56,12 +56,12 @@ class MarketoAgentExecutor(AgentExecutor):
                         event.content.parts if event.content and event.content.parts else []
                     )
                     logger.debug("Yielding final response: %s", parts)
-                    task_updater.add_artifact(parts)
-                    task_updater.complete()
+                    await task_updater.add_artifact(parts)
+                    await task_updater.complete()
                     break
                 if not event.get_function_calls():
                     logger.debug("Yielding update response")
-                    task_updater.update_status(
+                    await task_updater.update_status(
                         TaskState.working,
                         message=task_updater.new_agent_message(
                             convert_genai_parts_to_a2a(
@@ -75,7 +75,7 @@ class MarketoAgentExecutor(AgentExecutor):
                     logger.debug("Skipping event with function calls")
         except Exception as e:
             logger.error(f"Error processing request: {e}", exc_info=True)
-            task_updater.update_status(
+            await task_updater.update_status(
                 TaskState.failed,
                 message=task_updater.new_agent_message([
                     Part(root=TextPart(text=f"Error processing request: {str(e)}"))
@@ -99,8 +99,8 @@ class MarketoAgentExecutor(AgentExecutor):
         updater = TaskUpdater(event_queue, context.task_id, context.context_id)
         
         # Proper task management - always submit first, then start work
-        updater.submit()
-        updater.start_work()
+        await updater.submit()
+        await updater.start_work()
         
         await self._process_request(
             types.UserContent(

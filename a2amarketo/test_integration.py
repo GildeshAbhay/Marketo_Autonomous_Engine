@@ -23,6 +23,7 @@ async def test_agent_card_retrieval():
     async with httpx.AsyncClient(timeout=10) as client:
         try:
             response = await client.get("http://localhost:10002/.well-known/agent-card.json")
+            print(f"Agent card response: {response.text}")
             if response.status_code == 200:
                 card_data = response.json()
                 print(f"✅ Agent card retrieved successfully:")
@@ -44,6 +45,7 @@ async def test_mcp_server():
     async with httpx.AsyncClient(timeout=10) as client:
         try:
             response = await client.get("http://localhost:8002/sse")
+            print(f"MCP server response: {response.text}")
             if response.status_code in [200, 405]:  # 405 is expected for GET on SSE endpoint
                 print("✅ MCP server is responding")
                 return True

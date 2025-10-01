@@ -125,11 +125,19 @@ async def handle_sse(request: Request):
     ) as (reader, writer):
         await _server.run(reader, writer, _server.create_initialization_options())
 
+# Wrap handle_post_message as a proper ASGI app
+class MessageHandler:
+    """ASGI application wrapper for SSE message handling."""
+    
+    async def __call__(self, scope, receive, send):
+        await sse.handle_post_message(scope, receive, send)
+
 # Create Starlette app with proper routes
 app = Starlette(
     debug=True,
     routes=[
-        Route("/sse", endpoint=handle_sse, methods=["GET"]),  # SSE endpoint
+        Route("/sse", endpoint=handle_sse, methods=["GET"]),
+        Mount("/messages", app=MessageHandler()),  # Mount the ASGI app
     ],
 )
 
@@ -140,103 +148,3 @@ app = Starlette(
 if __name__ == "__main__":
     # Use uvicorn directly instead of mcp.run() for better control
     uvicorn.run(app, host="localhost", port=8002, log_level="info")
-# """
-# Simplified FastMCP server for Marketo operations.
-# """
-
-# import sys
-# import os
-# import yaml
-# from utils.marketo_client import MarketoClient
-# from utils.action_agent import ActionAgent
-# from fastmcp import FastMCP
-
-# # Ensure repo root on sys.path
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-# # ------------------------------------------------------------------------------
-# # Load configuration
-# # ------------------------------------------------------------------------------
-
-# CONFIG_PATH = os.path.join(os.path.dirname(__file__), "..", "config", "config.yaml")
-# try:
-#     with open(CONFIG_PATH, "r") as fh:
-#         cfg = yaml.safe_load(fh)
-# except FileNotFoundError:
-#     cfg = {}
-
-# mcfg = cfg.get("settings", {}).get("marketo", {})
-
-# identity_base = mcfg.get("identity_base") or os.environ.get("MARKETO_IDENTITY_BASE")
-# rest_base = mcfg.get("rest_base") or os.environ.get("MARKETO_REST_BASE")
-# client_id = mcfg.get("client_id") or os.environ.get("MARKETO_CLIENT_ID")
-# client_secret = mcfg.get("client_secret") or os.environ.get("MARKETO_CLIENT_SECRET")
-
-# print("identity_base is", identity_base)
-
-# marketo = MarketoClient(client_id, client_secret, identity_base, rest_base)
-# agent = ActionAgent(marketo)
-
-# # ------------------------------------------------------------------------------
-# # Create FastMCP and register tools
-# # ------------------------------------------------------------------------------
-
-# mcp = FastMCP(name="marketo-action-agent")
-
-# @mcp.tool()
-# def trigger_campaign(campaign_id: int, input_payload: dict) -> dict:
-#     """
-#     Trigger a Marketo campaign by ID.
-
-#     Args:
-#         campaign_id: The ID of the Marketo campaign.
-#         input_payload: Dictionary of parameters to send.
-
-#     Returns:
-#         API response from Marketo.
-#     """
-#     try:
-#         return agent.trigger_campaign(campaign_id, input_payload)
-#     except Exception as e:
-#         return {"error": str(e)}
-
-# @mcp.tool()
-# def update_smart_list(smart_list_id: int, payload: dict) -> dict:
-#     """
-#     Update a Marketo Smart List.
-
-#     Args:
-#         smart_list_id: ID of the Smart List to update.
-#         payload: Fields to update.
-
-#     Returns:
-#         API response from Marketo.
-#     """
-#     try:
-#         return agent.update_smart_list(smart_list_id, payload)
-#     except Exception as e:
-#         return {"error": str(e)}
-
-# @mcp.tool()
-# def get_campaign(campaign_id: str) -> dict:
-#     """
-#     Retrieve details about a specific Marketo campaign.
-
-#     Args:
-#         campaign_id: The campaign ID.
-
-#     Returns:
-#         Campaign details as a dictionary.
-#     """
-#     try:
-#         return agent.get_campaign(campaign_id)
-#     except Exception as e:
-#         return {"error": str(e)}
-
-# # ------------------------------------------------------------------------------
-# # Run server using FastMCP's built-in server
-# # ------------------------------------------------------------------------------
-
-# if __name__ == "__main__":
-#     # Use FastMCP's built-in server instead of custom Starlette app
-#     mcp.run(transport="sse", host="localhost", port=8002)

@@ -46,13 +46,13 @@ def main():
         skill = AgentSkill(
             id="web_search",
             name="Web Search and Research",
-            description="Searches for Marketo-related resources, analyzes trends, and provides research insights.",
-            tags=["web_search", "research", "marketo"],
-            examples=["Search for Marketo best practices", "Find marketing automation trends", "Get competitor analysis"],
+            description="Searches for companies and their marketing spend and provides research insights.",
+            tags=["web_search", "research", "stocks"],
+            examples=["tell me about Grazitti interatcive", "Whats the revenue of Grazitti interatcive", "Get competitor analysis of Grazitti interatcive"],
         )
         agent_card = AgentCard(
             name="Web Search Agent",
-            description="An agent that searches for Marketo-related resources, analyzes trends, and provides research insights.",
+            description="An agent that searches for company realated information like revenue, resources, Firmographics, Marketing Spend, Marketing Spend of competitors, etc.",
             url=f"http://{host}:{port}/",
             version="1.0.0",
             defaultInputModes=["text/plain"],
