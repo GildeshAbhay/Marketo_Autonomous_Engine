@@ -97,6 +97,89 @@ def get_campaign(campaign_id: str) -> dict:
     """
     return agent.get_campaign(campaign_id)
 
+
+@mcp.tool()
+def get_lead_by_id(lead_id: int, fields: list = None) -> dict:
+    """
+    Retrieve a specific lead by ID from Marketo.
+
+    Args:
+        lead_id: The Marketo lead ID to fetch.
+        fields: Optional list of field names to return. If not specified, returns all fields.
+
+    Returns:
+        Lead details as a dictionary.
+    """
+    return agent.get_lead_by_id(lead_id, fields)
+
+@mcp.tool()
+def get_leads_by_filter_type(filter_type: str, filter_values: list, fields: list = None, batch_size: int = 300) -> dict:
+    """
+    Retrieve multiple leads by filter type (email, id, cookie, etc.).
+
+    Args:
+        filter_type: Type of filter to use (e.g., 'email', 'id', 'cookie').
+        filter_values: List of values to filter by.
+        fields: Optional list of field names to return.
+        batch_size: Number of leads to return (max 300).
+
+    Returns:
+        Dictionary containing list of matching leads.
+    """
+    return agent.get_leads_by_filter_type(filter_type, filter_values, fields, batch_size)
+
+@mcp.tool()
+def describe_lead() -> dict:
+    """
+    Get metadata about available lead fields in Marketo.
+
+    Returns:
+        Dictionary containing field metadata including field names, data types, 
+        whether they're REST readable/updatable, etc.
+    """
+    return agent.describe_lead()
+
+@mcp.tool()
+def get_lead_partitions() -> dict:
+    """
+    Retrieve all lead partitions configured in the Marketo instance.
+
+    Returns:
+        Dictionary containing list of lead partitions with their IDs and names.
+    """
+    return agent.get_lead_partitions()
+
+@mcp.tool()
+def get_leads_by_program(program_id: int, fields: list = None, batch_size: int = 300) -> dict:
+    """
+    Retrieve leads that are members of a specific Marketo program.
+
+    Args:
+        program_id: The Marketo program ID.
+        fields: Optional list of field names to return.
+        batch_size: Number of leads to return (max 300).
+
+    Returns:
+        Dictionary containing list of leads in the program.
+    """
+    return agent.get_leads_by_program(program_id, fields, batch_size)
+
+@mcp.tool()
+def get_leads_by_smart_list(smart_list_id: int, fields: list = None, batch_size: int = 300, next_page_token: str = None) -> dict:
+    """
+    Retrieve leads that are members of a specific Smart List.
+
+    Args:
+        smart_list_id: The Marketo Smart List ID.
+        fields: Optional list of field names to return.
+        batch_size: Number of leads to return (max 300).
+        next_page_token: Token for pagination to get next page of results.
+
+    Returns:
+        Dictionary containing list of leads and pagination info (nextPageToken if more results exist).
+    """
+    return agent.get_leads_by_smart_list(smart_list_id, fields, batch_size, next_page_token)
+
 # ToDo: Added in Future
 # @mcp.tool()
 # def get_campaign_details(campaign_id: int) -> dict:
