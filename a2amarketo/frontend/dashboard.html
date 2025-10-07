@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Marketo A2A</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="logo">
+                <h1><i class="fas fa-robot"></i> Marketo A2A</h1>
+            </div>
+            <div class="header-actions">
+                <div class="user-info">
+                    <span id="user-name">Welcome, User</span>
+                    <button id="logout-btn" class="btn btn-outline">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <div class="dashboard-container">
+            <div class="welcome-section">
+                <h2>Welcome to Marketo A2A Dashboard</h2>
+                <p>Choose an option to get started with your autonomous marketing engine</p>
+            </div>
+
+            <div class="options-grid">
+                <div class="option-card" id="chat-option">
+                    <div class="option-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="option-content">
+                        <h3>Agent Chat</h3>
+                        <p>Interact with your Marketo agents. Ask questions about campaigns, leads, or marketing automation.</p>
+                        <div class="option-features">
+                            <span class="feature-tag">Real-time</span>
+                            <span class="feature-tag">AI-powered</span>
+                        </div>
+                    </div>
+                    <div class="option-action">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-arrow-right"></i> Start Chatting
+                        </button>
+                    </div>
+                </div>
+
+                <div class="option-card" id="reports-option">
+                    <div class="option-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="option-content">
+                        <h3>Report Generation</h3>
+                        <p>Generate structured marketing reports using predefined templates and custom parameters.</p>
+                        <div class="option-features">
+                            <span class="feature-tag">Templates</span>
+                            <span class="feature-tag">Customizable</span>
+                        </div>
+                    </div>
+                    <div class="option-action">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-arrow-right"></i> Generate Reports
+                        </button>
+                    </div>
+                </div>
+
+                <div class="option-card" id="history-option">
+                    <div class="option-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="option-content">
+                        <h3>Conversation History</h3>
+                        <p>View past conversations and sessions. Search by session ID to review previous interactions.</p>
+                        <div class="option-features">
+                            <span class="feature-tag">Searchable</span>
+                            <span class="feature-tag">Persistent</span>
+                        </div>
+                    </div>
+                    <div class="option-action">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-arrow-right"></i> View History
+                        </button>
+                    </div>
+                </div>
+
+                <div class="option-card" id="health-option">
+                    <div class="option-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="option-content">
+                        <h3>System Health</h3>
+                        <p>Monitor the status of all agents and backend systems. Ensure everything is running smoothly.</p>
+                        <div class="option-features">
+                            <span class="feature-tag">Real-time</span>
+                            <span class="feature-tag">Monitoring</span>
+                        </div>
+                    </div>
+                    <div class="option-action">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-arrow-right"></i> Check Health
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notification Container -->
+    <div id="notifications" class="notifications"></div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

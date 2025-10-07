@@ -23,6 +23,12 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Handle preflight requests
         self.send_response(200)
         self.end_headers()
+    
+    def do_GET(self):
+        # If requesting root, serve login.html
+        if self.path == '/':
+            self.path = '/login.html'
+        return super().do_GET()
 
 if __name__ == "__main__":
     # Change to the directory containing this script
@@ -30,6 +36,7 @@ if __name__ == "__main__":
     
     with socketserver.TCPServer(("", PORT), CustomHTTPRequestHandler) as httpd:
         print(f"Frontend server running at http://localhost:{PORT}")
+        print("Default page: login.html")
         print("Press Ctrl+C to stop the server")
         try:
             httpd.serve_forever()
