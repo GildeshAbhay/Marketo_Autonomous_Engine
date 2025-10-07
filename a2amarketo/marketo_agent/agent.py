@@ -5,7 +5,7 @@ from google.adk.agents import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import SseServerParams
 from google.adk.agents import LlmAgent
-from marketo_client import MarketoClient
+from utils.marketo_client import MarketoClient
 
 # # Initialize Marketo client
 # def get_marketo_client() -> MarketoClient:

@@ -43,8 +43,10 @@ class MarketoClient:
         print(f"Token: {token}")
         headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
         url = f"{self.rest_base}{path}"
+        print(f"URL: {url}")
         resp = requests.request(method, url, params=params, json=json, headers=headers, timeout=15)
         resp.raise_for_status()
+        print(f"Response: {resp.json()}")
         # Marketo responses usually wrap results in a 'result' field; return raw json for now
         return resp.json()
 
@@ -104,8 +106,6 @@ class MarketoClient:
         params = {}
         if fields:
             params["fields"] = ",".join(fields)
-        
-        print(f"Path for get lead by id: {path}")
         return self._request("GET", path, params=params if params else None)
 
     def get_leads_by_filter_type(

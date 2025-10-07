@@ -25,12 +25,12 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.tools.tool_context import ToolContext
 from google.genai import types
 
-from .marketo_tools import (
-    create_smart_list,
-    find_leads,
-    trigger_campaign,
-    get_marketo_assets,
-)
+# from .marketo_tools import (
+#     create_smart_list,
+#     find_leads,
+#     trigger_campaign,
+#     get_marketo_assets,
+# )
 from .remote_agent_connection import RemoteAgentConnections
 
 load_dotenv()

@@ -15,8 +15,10 @@ async def test_mcp():
         print("Available tools:", tools)
 
         # Step 3: Call a read-only tool (replace 123 with a real campaign ID from Marketo)
-        result = await client.call_tool("get_leads_by_filter_type", {"filter_type": "email", "filter_values": ["Munnim@grazitti.com"], "fields": ["id", "email", "first_name", "last_name", "company"], "batch_size": 100})
-        print("get_campaign result:", result)
+        # result = await client.call_tool("get_leads_by_filter_type", {"filter_type": "email", "filter_values": ["Munnim@grazitti.com"], "fields": ["id", "email", "first_name", "last_name", "company"], "batch_size": 100})
+        # print("get_campaign result:", result)
+
+        result = await client.call_tool("get_campaign", {"campaign_id": "4567"})
 
         # Optional: Test trigger_campaign (side-effecting; use real data cautiously)
         # payload = {"input": [{"id": your_lead_id}]}  # Uncomment with valid payload
