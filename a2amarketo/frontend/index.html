@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketo A2A Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <h2>Marketo A2A Dashboard</h2>
+                <p>Initializing your autonomous marketing engine...</p>
+            </div>
+        </div>
+
+        <!-- Login Screen -->
+        <div id="login-screen" class="screen hidden">
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h1><i class="fas fa-robot"></i> Marketo A2A</h1>
+                        <p>Autonomous Marketing Engine</p>
+                    </div>
+                    
+                    <form id="login-form" class="login-form">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </form>
+                    
+                    <div class="login-footer">
+                        <p>Don't have an account? <a href="#" id="show-register">Register here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Screen -->
+        <div id="register-screen" class="screen hidden">
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h1><i class="fas fa-user-plus"></i> Create Account</h1>
+                        <p>Join the Marketo A2A platform</p>
+                    </div>
+                    
+                    <form id="register-form" class="login-form">
+                        <div class="form-group">
+                            <label for="reg-username">Username</label>
+                            <input type="text" id="reg-username" name="username" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reg-email">Email</label>
+                            <input type="email" id="reg-email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reg-fullname">Full Name</label>
+                            <input type="text" id="reg-fullname" name="full_name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reg-password">Password</label>
+                            <input type="password" id="reg-password" name="password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Register
+                        </button>
+                    </form>
+                    
+                    <div class="login-footer">
+                        <p>Already have an account? <a href="#" id="show-login">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div id="dashboard" class="screen hidden">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-content">
+                    <div class="logo">
+                        <h1><i class="fas fa-robot"></i> Marketo A2A</h1>
+                    </div>
+                    <div class="header-actions">
+                        <div class="user-info">
+                            <span id="user-name">Welcome, User</span>
+                            <button id="logout-btn" class="btn btn-outline">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="dashboard-main">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <nav class="sidebar-nav">
+                        <a href="#" class="nav-item active" data-section="chat">
+                            <i class="fas fa-comments"></i>
+                            <span>Agent Chat</span>
+                        </a>
+                        <a href="#" class="nav-item" data-section="reports">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Reports</span>
+                        </a>
+                        <a href="#" class="nav-item" data-section="history">
+                            <i class="fas fa-history"></i>
+                            <span>History</span>
+                        </a>
+                        <a href="#" class="nav-item" data-section="health">
+                            <i class="fas fa-heartbeat"></i>
+                            <span>System Health</span>
+                        </a>
+                    </nav>
+                </aside>
+
+                <!-- Content Area -->
+                <div class="content-area">
+                    <!-- Chat Section -->
+                    <section id="chat-section" class="content-section active">
+                        <div class="section-header">
+                            <h2><i class="fas fa-comments"></i> Agent Chat</h2>
+                            <p>Interact with your Marketo agents</p>
+                        </div>
+                        
+                        <div class="chat-container">
+                            <div id="chat-messages" class="chat-messages">
+                                <div class="message system">
+                                    <div class="message-content">
+                                        <i class="fas fa-robot"></i>
+                                        <p>Welcome to Marketo A2A! I'm your autonomous marketing assistant. Ask me anything about your Marketo campaigns, leads, or marketing automation.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="chat-input-container">
+                                <form id="chat-form" class="chat-form">
+                                    <div class="input-group">
+                                        <input type="text" id="chat-input" placeholder="Ask about campaigns, leads, or marketing automation..." required>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Reports Section -->
+                    <section id="reports-section" class="content-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-chart-bar"></i> Reports</h2>
+                            <p>Generate and view marketing reports</p>
+                        </div>
+                        
+                        <div class="reports-container">
+                            <div class="report-templates">
+                                <h3>Report Templates</h3>
+                                <div id="report-templates-list" class="templates-grid">
+                                    <!-- Templates will be loaded here -->
+                                </div>
+                            </div>
+                            
+                            <div class="report-generator">
+                                <h3>Generate Custom Report</h3>
+                                <form id="report-form" class="report-form">
+                                    <div class="form-group">
+                                        <label for="report-template">Template</label>
+                                        <select id="report-template" required>
+                                            <option value="">Select a template...</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="campaign-id">Campaign ID (for campaign reports)</label>
+                                        <input type="text" id="campaign-id" placeholder="Enter campaign ID">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="smart-list-id">Smart List ID (for lead reports)</label>
+                                        <input type="text" id="smart-list-id" placeholder="Enter smart list ID">
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-chart-bar"></i> Generate Report
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- History Section -->
+                    <section id="history-section" class="content-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-history"></i> Conversation History</h2>
+                            <p>View past conversations and sessions</p>
+                        </div>
+                        
+                        <div class="history-container">
+                            <div class="history-search">
+                                <input type="text" id="session-search" placeholder="Search by session ID...">
+                                <button id="search-history" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                            
+                            <div id="history-results" class="history-results">
+                                <p class="no-history">Enter a session ID to view conversation history</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Health Section -->
+                    <section id="health-section" class="content-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-heartbeat"></i> System Health</h2>
+                            <p>Monitor agent status and system health</p>
+                        </div>
+                        
+                        <div class="health-container">
+                            <div id="health-status" class="health-status">
+                                <!-- Health status will be loaded here -->
+                            </div>
+                            
+                            <button id="refresh-health" class="btn btn-primary">
+                                <i class="fas fa-sync-alt"></i> Refresh Status
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notifications" class="notifications"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
