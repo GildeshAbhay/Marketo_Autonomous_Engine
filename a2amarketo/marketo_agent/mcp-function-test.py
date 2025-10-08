@@ -64,8 +64,8 @@ agent = ActionAgent(marketo)
 # response = agent.update_smart_list(smart_list_id, payload)
 # print(f"Response update smart list : {response}")
 
-response = agent.get_campaign(campaign_id = "4567")
-print(f"Response get campaign : {response}")
+# response = agent.get_campaign(campaign_id = "4567")
+# print(f"Response get campaign : {response}")
 
 response = agent.get_lead_by_id(lead_id = 6228, fields=["id", "email", "firstName", "lastName", "company"])
 print(f"Response get lead by id : {response}")

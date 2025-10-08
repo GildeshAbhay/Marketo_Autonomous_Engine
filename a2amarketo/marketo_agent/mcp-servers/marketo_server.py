@@ -71,18 +71,22 @@ def trigger_campaign(campaign_id: int, input_payload: dict) -> dict:
     return agent.trigger_campaign(campaign_id, input_payload)
 
 @mcp.tool()
-def update_smart_list(smart_list_id: int, payload: dict) -> dict:
+def update_smart_campaign_by_id(smart_campaign_id: int, payload: dict) -> dict:
     """
-    Update a Marketo Smart List.
+    Update a Marketo Smart Campaign by ID. It updates the Name and Description of the Smart Campaign only.
+
+    payload should be a dictionary with the following keys as optional as 1 can be provided or both:
+    - name: The name of the smart campaign.
+    - description: The description of the smart campaign.
 
     Args:
-        smart_list_id: ID of the Smart List to update.
-        payload: Fields to update.
+        smart_campaign_id: The ID of the Marketo smart campaign.
+        payload: Dictionary of parameters to update.
 
     Returns:
         API response from Marketo.
     """
-    return agent.update_smart_list(smart_list_id, payload)
+    return agent.update_smart_campaign(smart_campaign_id, payload)
 
 @mcp.tool()
 def get_campaign(campaign_id: str) -> dict:
@@ -97,6 +101,18 @@ def get_campaign(campaign_id: str) -> dict:
     """
     return agent.get_campaign(campaign_id)
 
+@mcp.tool()
+def get_smart_list(smart_list_id: int) -> dict:
+    """
+    Retrieve a specific smart list by ID from Marketo.
+
+    Args:
+        smart_list_id: The smart list ID.
+
+    Returns:
+        Smart list details as a dictionary.
+    """
+    return agent.get_smart_list(smart_list_id)
 
 @mcp.tool()
 def get_lead_by_id(lead_id: int, fields: list = None) -> dict:

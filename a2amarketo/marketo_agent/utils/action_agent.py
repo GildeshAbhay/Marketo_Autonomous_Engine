@@ -17,6 +17,9 @@ class ActionAgent:
 
     def get_campaign(self, campaign_id: str) -> Dict[str, Any]:
         return self.client.get_campaign(campaign_id)
+    
+    def update_smart_campaign(self, smart_campaign_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
+        return self.client.update_smart_campaign(smart_campaign_id, payload)
 
     def trigger_campaign(self, campaign_id: int, input_payload: Dict[str, Any]) -> Dict[str, Any]:
         """Trigger a campaign with a payload. Validate payload before calling Marketo."""
@@ -25,8 +28,8 @@ class ActionAgent:
             raise ValueError("campaign_id must be int")
             return self.client.trigger_campaign(campaign_id, input_payload)
 
-    def update_smart_list(self, smart_list_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
-        return self.client.update_smart_list(smart_list_id, payload)
+    def get_smart_list(self, smart_list_id: int) -> Dict[str, Any]:
+        return self.client.get_smart_list(smart_list_id)
 
     def get_lead_by_id(self, lead_id: int, fields: list[str] = None) -> Dict[str, Any]:
         """Fetch a lead by ID with optional field filtering."""
