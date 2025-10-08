@@ -5,7 +5,14 @@ from typing import Dict, Any
 class DeploymentConfig:
     """Load deployment configuration based on environment."""
     
-    def __init__(self, config_path: str = "deployment_config.json"):
+    def __init__(self, config_path: str = None):
+        if config_path is None:
+            # Look for config relative to this file
+            config_path = os.path.join(
+                os.path.dirname(__file__), 
+                "..", 
+                "deployment_config.json"
+            )
         self.config_path = config_path
         self.env = os.getenv("DEPLOYMENT_ENV", "local")
         self.config = self._load_config()
@@ -38,10 +45,18 @@ class DeploymentConfig:
         return self.config[service_name]["host"]
     
     def get_service_port(self, service_name: str) -> int:
-        """Get port for a service (Cloud Run uses PORT env var)."""
-        # In production, Cloud Run sets PORT env var
-        if self.env == "production":
-            return int(os.getenv("PORT", self.config[service_name]["port"]))
+        """
+        Get port for a service.
+        
+        Priority:
+        1. PORT environment variable (set by Cloud Run)
+        2. deployment_config.json value
+        """
+        # PRIORITY 1: Cloud Run sets PORT env var
+        if os.getenv("PORT"):
+            return int(os.getenv("PORT"))
+        
+        # PRIORITY 2: deployment_config.json
         return self.config[service_name]["port"]
     
     def get_database_url(self) -> str:
