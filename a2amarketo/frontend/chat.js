@@ -1,5 +1,8 @@
 // API Configuration
-const API_BASE_URL = 'http://localhost:5000/api';
+// const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000'
+    : 'YOUR_BACKEND_CLOUD_RUN_URL';  // Will be set after deployment
 
 // State Management
 let currentUser = null;

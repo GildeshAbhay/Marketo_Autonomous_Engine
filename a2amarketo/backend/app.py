@@ -54,9 +54,15 @@ async def startup_event():
     print("✅ Database initialized")
     
     # Initialize host agent
+    # marketo_agent_urls = [
+    #     "http://localhost:10002",  # Marketo Agent
+    #     "http://localhost:10003",  # Web Search Agent
+    # ]
+    from config import settings
+
     marketo_agent_urls = [
-        "http://localhost:10002",  # Marketo Agent
-        "http://localhost:10003",  # Web Search Agent
+        settings.marketo_agent_url,  # From deployment_config.json
+        settings.websearch_agent_url,  # From deployment_config.json
     ]
     
     print("🔄 Initializing Host Agent...")

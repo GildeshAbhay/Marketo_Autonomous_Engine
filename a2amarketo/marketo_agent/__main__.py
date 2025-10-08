@@ -1,5 +1,10 @@
 import logging
+import sys
 import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from shared.config_loader import get_config
+
+deployment_config = get_config()
 
 import uvicorn
 from a2a.server.apps import A2AStarletteApplication
@@ -26,14 +31,17 @@ logger = logging.getLogger(__name__)
 
 class MissingAPIKeyError(Exception):
     """Exception for missing API key."""
-
     pass
-
 
 def main():
     """Starts the agent server."""
-    host = "localhost"
-    port = 10002
+    # host = "localhost"
+    # port = 10002
+
+    service_name = "marketo_agent"  # or "websearch_agent"
+    host = deployment_config.get_service_host(service_name)
+    port = deployment_config.get_service_port(service_name)
+
     try:
         # Check for API key only if Vertex AI is not configured
         if not os.getenv("GOOGLE_GENAI_USE_VERTEXAI") == "TRUE":

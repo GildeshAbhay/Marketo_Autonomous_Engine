@@ -9,7 +9,9 @@ import socketserver
 import os
 import sys
 
-PORT = 8080
+import os
+
+PORT = int(os.getenv("PORT", 8080))  # Cloud Run compatibility
 
 class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):

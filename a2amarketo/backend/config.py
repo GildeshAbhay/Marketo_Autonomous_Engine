@@ -1,24 +1,36 @@
 from pydantic_settings import BaseSettings
 from typing import List
+import os
+import sys
+
+# Add path to shared config
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from shared.config_loader import get_config
+
+deployment_config = get_config()
 
 class Settings(BaseSettings):
-    # Backend settings
-    backend_host: str = "localhost"
-    backend_port: int = 5000
+    # Backend settings - now from deployment_config.json
+    backend_host: str = deployment_config.get_service_host("backend")
+    backend_port: int = deployment_config.get_service_port("backend")
     
-    # Agent URLs
-    host_agent_url: str = "http://localhost:8000"
-    marketo_agent_url: str = "http://localhost:10002"
-    websearch_agent_url: str = "http://localhost:10003"
+    # Agent URLs - now from deployment_config.json
+    marketo_agent_url: str = deployment_config.get_service_url("marketo_agent")
+    websearch_agent_url: str = deployment_config.get_service_url("websearch_agent")
+    mcp_server_url: str = deployment_config.get_service_url("mcp_server")
     
-    # CORS
-    allowed_origins: List[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"]
+    # CORS - environment-aware
+    allowed_origins: List[str] = [
+        deployment_config.get_service_url("frontend"),
+        "http://localhost:3000",
+        "http://localhost:5173",
+    ] if deployment_config.env == "local" else [deployment_config.get_service_url("frontend")]
     
-    # Database
-    database_url: str = "sqlite+aiosqlite:///./conversations.db"
+    # Database - now from deployment_config.json
+    database_url: str = deployment_config.get_database_url()
     
-    # JWT Authentication
-    secret_key: str = "813ade66f503ab91188bf1ed95e6c6fd4e6410c90097186960c28cdd285d20fe"
+    # JWT Authentication (keep from .env for security)
+    secret_key: str = os.getenv("SECRET_KEY", "813ade66f503ab91188bf1ed95e6c6fd4e6410c90097186960c28cdd285d20fe")
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
@@ -27,4 +39,3 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 settings = Settings()
-

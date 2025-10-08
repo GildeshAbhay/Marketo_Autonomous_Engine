@@ -130,6 +130,12 @@ from utils.marketo_client import MarketoClient
 #     except Exception as e:
 #         return f"Error creating smart list: {str(e)}"
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from shared.config_loader import get_config
+
+deployment_config = get_config()
 
 def create_agent() -> LlmAgent:
     """Constructs the ADK agent for Marketo operations."""
@@ -144,10 +150,15 @@ def create_agent() -> LlmAgent:
             
         """,
         tools=[MCPToolset(
-            connection_params=SseServerParams(
-                url="http://localhost:8002/sse",  # Connect to your FastMCP server via HTTP/SSE
-            )
-        )],
+                connection_params=SseServerParams(
+                url=deployment_config.get_service_url("mcp_server") + "/sse",
+                )
+                )],
+        # tools=[MCPToolset(
+        #     connection_params=SseServerParams(
+        #         url="http://localhost:8002/sse",  # Connect to your FastMCP server via HTTP/SSE
+        #     )
+        # )],
     )
 
 
