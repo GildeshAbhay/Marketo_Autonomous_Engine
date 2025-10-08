@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     websearch_agent_url: str = "http://localhost:10003"
     
     # CORS
-    allowed_origins: List[str] = ["http://localhost:3000", "http://localhost:5173", , "http://localhost:8080"]
+    allowed_origins: List[str] = ["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"]
     
     # Database
     database_url: str = "sqlite+aiosqlite:///./conversations.db"
