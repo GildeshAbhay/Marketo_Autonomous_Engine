@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     database_url: str = deployment_config.get_database_url()
     
     # JWT Authentication (keep from .env for security)
-    secret_key: str = os.getenv("SECRET_KEY", "813ade66f503ab91188bf1ed95e6c6fd4e6410c90097186960c28cdd285d20fe")
+    secret_key: str = os.getenv("SECRET_KEY")
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7

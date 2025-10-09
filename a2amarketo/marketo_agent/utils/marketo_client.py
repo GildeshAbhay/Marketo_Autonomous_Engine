@@ -43,7 +43,7 @@ class MarketoClient:
         print(f"Token: {token}")
         headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
         url = f"{self.rest_base}{path}"
-        print(f"URL: {url}")
+        print(f"URL to hit: {url} , and payload: {json}")
         resp = requests.request(method, url, params=params, json=json, headers=headers, timeout=15)
         resp.raise_for_status()
         print(f"Response: {resp.json()}")
@@ -56,7 +56,7 @@ class MarketoClient:
         """Fetch campaign asset details.
         Endpoint pattern: GET /rest/asset/v1/smartCampaign/{id}.json
         """
-        path = f"/asset/v1/smartCampaign/{campaign_id}.json"
+        path = f"/rest/asset/v1/smartCampaign/{campaign_id}.json"
         return self._request("GET", path)
 
 
@@ -64,7 +64,7 @@ class MarketoClient:
         """Fetch a smart list asset.
         Endpoint pattern: GET /rest/asset/v1/smart/list/{id}.json
         """
-        path = f"/rest/asset/v1/smart/list/{smart_list_id}.json"
+        path = f"/rest/asset/v1/smartList/{smart_list_id}.json"
         return self._request("GET", path)
 
 
@@ -77,6 +77,10 @@ class MarketoClient:
         params = {"offset": offset, "maxReturn": max_return}
         return self._request("GET", path, params=params)
 
+    def update_smart_campaign(self, smart_campaign_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Update a smart campaign. Example endpoint: POST /rest/asset/v1/smartCampaign/{id}.json"""
+        path = f"/rest/asset/v1/smartCampaign/{smart_campaign_id}.json"
+        return self._request("POST", path, json=payload)
 
     def trigger_campaign(self, campaign_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Trigger a campaign. Example endpoint: POST /rest/v1/campaigns/{id}/trigger.json
@@ -85,11 +89,6 @@ class MarketoClient:
         path = f"/rest/v1/campaigns/{campaign_id}/trigger.json"
         return self._request("POST", path, json=payload)
 
-
-    def update_smart_list(self, smart_list_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """Update smart list (if your flow supports updating via REST) - adapt as needed."""
-        path = f"/rest/asset/v1/smart/list/{smart_list_id}.json"
-        return self._request("POST", path, json=payload)
 
     def get_lead_by_id(self, lead_id: int, fields: Optional[list[str]] = None) -> Dict[str, Any]:
         """Fetch a lead by ID.
