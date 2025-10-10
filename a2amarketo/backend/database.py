@@ -31,6 +31,7 @@ class User(Base):
     full_name = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    role = Column(String, default="analyst", nullable=False)  # Options: "admin", "analyst"
 
 async def init_db():
     async with engine.begin() as conn:
@@ -58,3 +59,76 @@ async def get_conversation_history(session_id: str):
             for conv in conversations
         ]
 
+class APIUsage(Base):
+    """Track user API usage for analytics."""
+    __tablename__ = "api_usage"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False, index=True)  # FK to User.id
+    username = Column(String, nullable=False, index=True)  # Denormalized for easier queries
+    endpoint = Column(String, nullable=False)  # e.g., "/api/query", "/api/reports/generate"
+    endpoint_type = Column(String, nullable=False)  # "query", "report", "auth"
+    method = Column(String, nullable=False)  # "GET", "POST", etc.
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    session_id = Column(String, nullable=True)  # For tracking sessions
+    query_text = Column(Text, nullable=True)  # Store query if applicable (for audit)
+    status_code = Column(Integer, nullable=True)  # Response status
+    response_time_ms = Column(Integer, nullable=True)  # For performance tracking
+
+
+async def log_api_usage(
+    user_id: int,
+    username: str,
+    endpoint: str,
+    endpoint_type: str,
+    method: str = "POST",
+    session_id: str = None,
+    query_text: str = None,
+    status_code: int = 200,
+    response_time_ms: int = None
+):
+    """Log API usage for analytics."""
+    async with async_session_maker() as session:
+        usage = APIUsage(
+            user_id=user_id,
+            username=username,
+            endpoint=endpoint,
+            endpoint_type=endpoint_type,
+            method=method,
+            session_id=session_id,
+            query_text=query_text,
+            status_code=status_code,
+            response_time_ms=response_time_ms
+        )
+        session.add(usage)
+        await session.commit()
+
+
+async def get_user_usage_stats(user_id: int, start_date: datetime = None, end_date: datetime = None):
+    """Get usage statistics for a user."""
+    async with async_session_maker() as session:
+        query = select(APIUsage).where(APIUsage.user_id == user_id)
+        
+        if start_date:
+            query = query.where(APIUsage.timestamp >= start_date)
+        if end_date:
+            query = query.where(APIUsage.timestamp <= end_date)
+        
+        query = query.order_by(APIUsage.timestamp.desc())
+        
+        result = await session.execute(query)
+        usages = result.scalars().all()
+        
+        return {
+            "total_requests": len(usages),
+            "by_endpoint": {},
+            "requests": [
+                {
+                    "endpoint": u.endpoint,
+                    "endpoint_type": u.endpoint_type,
+                    "timestamp": u.timestamp,
+                    "status_code": u.status_code
+                }
+                for u in usages
+            ]
+        }

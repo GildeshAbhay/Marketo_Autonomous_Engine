@@ -20,7 +20,6 @@ pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
-
 def _prehash_password(password: str) -> str:
     """
     Pre-hash password with SHA256 and base64 encode to ensure it's always under 72 bytes.
@@ -121,3 +120,27 @@ def verify_refresh_token(token: str) -> Optional[dict]:
     except JWTError:
         return None
 
+# Add at the END of auth.py (after line 123):
+
+async def require_admin(
+    current_user: User = Depends(get_current_active_user)
+) -> User:
+    """Dependency that requires admin role."""
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required for this operation"
+        )
+    return current_user
+
+
+async def require_analyst_or_admin(
+    current_user: User = Depends(get_current_active_user)
+) -> User:
+    """Dependency that requires analyst or admin role."""
+    if current_user.role not in ["admin", "analyst"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions. Analyst or Admin role required."
+        )
+    return current_user

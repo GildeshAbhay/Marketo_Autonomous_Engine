@@ -34,6 +34,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     full_name: Optional[str] = None
+    role: str = "analyst"  # Default to analyst for safety
 
 class UserResponse(BaseModel):
     id: int
@@ -42,6 +43,7 @@ class UserResponse(BaseModel):
     full_name: Optional[str]
     is_active: bool
     created_at: datetime
+    role: str  # Will be "admin" or "analyst"
     
     class Config:
         from_attributes = True
@@ -57,3 +59,20 @@ class TokenData(BaseModel):
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
+class AutonomousReportRequest(BaseModel):
+    """Request for autonomous report generation."""
+    start_date: str  # YYYY-MM-DD format
+    end_date: str    # YYYY-MM-DD format
+    report_type: str = "comprehensive"  # comprehensive, campaign, lead_analysis
+    session_id: str
+    user_id: Optional[str] = "default_user"
+    include_web_research: bool = True
+
+class AutonomousReportResponse(BaseModel):
+    """Response for autonomous report generation."""
+    session_id: str
+    report_content: str  # Markdown formatted report
+    report_type: str
+    period: Dict[str, str]  # start_date, end_date
+    generated_at: datetime
+    included_web_research: bool
