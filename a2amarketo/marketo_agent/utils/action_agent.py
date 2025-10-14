@@ -18,8 +18,25 @@ class ActionAgent:
     def get_campaign(self, campaign_id: str) -> Dict[str, Any]:
         return self.client.get_campaign(campaign_id)
     
-    def update_smart_campaign(self, smart_campaign_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
-        return self.client.update_smart_campaign(smart_campaign_id, payload)
+    def create_smart_campaign(self, name: str, folder_id: int, folder_type: str, description: str = "") -> Dict[str, Any]:
+        """Create a new smart campaign in Marketo."""
+        if not name or not isinstance(name, str):
+            raise ValueError("name must be a non-empty string")
+        if not isinstance(folder_id, int):
+            raise ValueError("folder_id must be an integer")
+        if folder_type not in ["Folder", "Program"]:
+            raise ValueError("folder_type must be 'Folder' or 'Program'")
+        
+        return self.client.create_smart_campaign(name, folder_id, folder_type, description)
+    
+    def update_smart_campaign(self, smart_campaign_id: int, name: str = None, description: str = None) -> Dict[str, Any]:
+        """Update a smart campaign's name and/or description."""
+        if not isinstance(smart_campaign_id, int):
+            raise ValueError("smart_campaign_id must be an integer")
+        if name is None and description is None:
+            raise ValueError("At least one of 'name' or 'description' must be provided")
+        
+        return self.client.update_smart_campaign(smart_campaign_id, name, description)
 
     def trigger_campaign(self, campaign_id: int, input_payload: Dict[str, Any]) -> Dict[str, Any]:
         """Trigger a campaign with a payload. Validate payload before calling Marketo."""

@@ -71,22 +71,37 @@ def trigger_campaign(campaign_id: int, input_payload: dict) -> dict:
     return agent.trigger_campaign(campaign_id, input_payload)
 
 @mcp.tool()
-def update_smart_campaign_by_id(smart_campaign_id: int, payload: dict) -> dict:
+def create_smart_campaign(name: str, folder_id: int, folder_type: str, description: str = "") -> dict:
     """
-    Update a Marketo Smart Campaign by ID. It updates the Name and Description of the Smart Campaign only.
-
-    payload should be a dictionary with the following keys as optional as 1 can be provided or both:
-    - name: The name of the smart campaign.
-    - description: The description of the smart campaign.
+    Create a new Marketo Smart Campaign.
 
     Args:
-        smart_campaign_id: The ID of the Marketo smart campaign.
-        payload: Dictionary of parameters to update.
+        name: The name of the smart campaign to create.
+        folder_id: The ID of the folder or program where the campaign will be created.
+        folder_type: The type of the folder - must be either 'Folder' or 'Program'.
+        description: Optional description for the smart campaign.
 
     Returns:
-        API response from Marketo.
+        API response from Marketo containing the created campaign details.
     """
-    return agent.update_smart_campaign(smart_campaign_id, payload)
+    return agent.create_smart_campaign(name, folder_id, folder_type, description)
+
+@mcp.tool()
+def update_smart_campaign_by_id(smart_campaign_id: int, name: str = None, description: str = None) -> dict:
+    """
+    Update a Marketo Smart Campaign's name and/or description.
+
+    At least one of 'name' or 'description' must be provided.
+
+    Args:
+        smart_campaign_id: The ID of the Marketo smart campaign to update.
+        name: Optional new name for the smart campaign.
+        description: Optional new description for the smart campaign.
+
+    Returns:
+        API response from Marketo containing the updated campaign details.
+    """
+    return agent.update_smart_campaign(smart_campaign_id, name, description)
 
 @mcp.tool()
 def get_campaign(campaign_id: str) -> dict:

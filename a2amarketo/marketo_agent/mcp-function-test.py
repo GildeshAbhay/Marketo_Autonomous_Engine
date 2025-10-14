@@ -64,13 +64,14 @@ agent = ActionAgent(marketo)
 # response = agent.update_smart_list(smart_list_id, payload)
 # print(f"Response update smart list : {response}")
 
-response = agent.get_campaign(campaign_id = "4567")
+response = agent.get_campaign(campaign_id = "10965")
 print(f"Response get campaign : {response}")
 
-response = agent.get_lead_by_id(lead_id = 6228, fields=["id", "email", "firstName", "lastName", "company"])
-print(f"Response get lead by id : {response}")
+# response = agent.get_lead_by_id(lead_id = 6228, fields=["id", "email", "firstName", "lastName", "company"])
+# print(f"Response get lead by id : {response}")
 
-
+response = agent.update_smart_campaign(smart_campaign_id = 10965, payload = {"description": "Change name description testing 1"})
+print(f"Response update smart campaign : {response}")
 
 # response = agent.get_leads_by_filter_type(filter_type, filter_values, fields, batch_size)
 # print(f"Response get leads by filter type : {response}")

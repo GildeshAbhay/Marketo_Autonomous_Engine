@@ -1,6 +1,7 @@
 import time
 import requests
 from typing import Any, Dict, Optional
+import json
 
 class MarketoClient:
     """Simple Marketo REST wrapper with token caching.
@@ -50,6 +51,18 @@ class MarketoClient:
         # Marketo responses usually wrap results in a 'result' field; return raw json for now
         return resp.json()
 
+    def _request_form(self, method: str, path: str, params: Dict[str, Any] | None = None, data: Dict[str, Any] | None = None) -> Dict[str, Any]:
+        """Request method for form-encoded data (application/x-www-form-urlencoded)"""
+        token = self._ensure_token()
+        print(f"Token: {token}")
+        headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/x-www-form-urlencoded"}
+        url = f"{self.rest_base}{path}"
+        print(f"URL to hit: {url} , and payload: {data}")
+        resp = requests.request(method, url, params=params, data=data, headers=headers, timeout=15)
+        resp.raise_for_status()
+        print(f"Response: {resp.json()}")
+        return resp.json()
+
 
     # -- Example helper methods (adjust endpoints for the fields you need) --
     def get_campaign(self, campaign_id: str) -> Dict[str, Any]:
@@ -77,10 +90,50 @@ class MarketoClient:
         params = {"offset": offset, "maxReturn": max_return}
         return self._request("GET", path, params=params)
 
-    def update_smart_campaign(self, smart_campaign_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
-        """Update a smart campaign. Example endpoint: POST /rest/asset/v1/smartCampaign/{id}.json"""
+    def create_smart_campaign(self, name: str, folder_id: int, folder_type: str, description: str = "") -> Dict[str, Any]:
+        """Create a new smart campaign.
+        Endpoint: POST /rest/asset/v1/smartCampaigns.json
+        
+        Args:
+            name: Name of the smart campaign
+            folder_id: ID of the folder to create the campaign in
+            folder_type: Type of folder (e.g., 'Folder' or 'Program')
+            description: Optional description of the campaign
+        
+        Returns:
+            API response with created campaign details
+        """
+        path = "/rest/asset/v1/smartCampaigns.json"
+        data = {
+            "name": name,
+            "folder": json.dumps({"id": folder_id, "type": folder_type}),
+            "description": description
+        }
+        return self._request_form("POST", path, data=data)
+
+    def update_smart_campaign(self, smart_campaign_id: int, name: str = None, description: str = None) -> Dict[str, Any]:
+        """Update a smart campaign's name and/or description.
+        Endpoint: POST /rest/asset/v1/smartCampaign/{id}.json
+        
+        Args:
+            smart_campaign_id: The ID of the smart campaign to update
+            name: Optional new name for the campaign
+            description: Optional new description for the campaign
+        
+        Returns:
+            API response with updated campaign details
+        """
         path = f"/rest/asset/v1/smartCampaign/{smart_campaign_id}.json"
-        return self._request("POST", path, json=payload)
+        data = {}
+        if name is not None:
+            data["name"] = name
+        if description is not None:
+            data["description"] = description
+        
+        if not data:
+            raise ValueError("At least one of 'name' or 'description' must be provided")
+        
+        return self._request_form("POST", path, data=data)
 
     def trigger_campaign(self, campaign_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
         """Trigger a campaign. Example endpoint: POST /rest/v1/campaigns/{id}/trigger.json
@@ -88,6 +141,7 @@ class MarketoClient:
         """
         path = f"/rest/v1/campaigns/{campaign_id}/trigger.json"
         return self._request("POST", path, json=payload)
+
 
 
     def get_lead_by_id(self, lead_id: int, fields: Optional[list[str]] = None) -> Dict[str, Any]:
