@@ -664,6 +664,129 @@ body {
     }
 }
 
+/* Permission Denied Styling - Make it prominent in chat */
+.message.permission-denied {
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+    border: 2px solid #dc3545;
+    border-left: 5px solid #dc3545;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message.permission-denied .message-avatar {
+    color: #dc3545;
+    font-size: 1.5em;
+}
+
+.message.permission-denied .message-text {
+    color: #721c24;
+    font-size: 1em;
+    line-height: 1.6;
+}
+
+.message.permission-denied .message-text strong {
+    color: #dc3545;
+    font-size: 1.15em;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.message.permission-denied .message-text em {
+    display: block;
+    margin-top: 0.5rem;
+    color: #856404;
+    font-size: 0.9em;
+}
+
+.message.permission-denied .message-text em strong {
+    display: inline;
+    font-size: 1em;
+    text-transform: uppercase;
+}
+
+/* User Role Badge */
+.user-role-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.role-admin {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.role-analyst {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+/* Enhanced notification for errors */
+.notification.error {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border-left: 4px solid #a71d2a;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Permission denied inline message */
+.permission-denied-inline {
+    display: flex;
+    gap: 1rem;
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+    border: 2px solid #dc3545;
+    border-left: 5px solid #dc3545;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+    animation: slideIn 0.3s ease-out;
+}
+
+.permission-icon {
+    font-size: 2em;
+    flex-shrink: 0;
+}
+
+.permission-content {
+    flex: 1;
+    color: #721c24;
+    line-height: 1.6;
+}
+
+.permission-content strong {
+    color: #dc3545;
+    font-size: 1.15em;
+}
+
+.permission-content em {
+    display: block;
+    margin-top: 0.5rem;
+    color: #856404;
+    font-size: 0.9em;
+}
+
+.permission-content em strong {
+    display: inline;
+    text-transform: uppercase;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .chat-main {

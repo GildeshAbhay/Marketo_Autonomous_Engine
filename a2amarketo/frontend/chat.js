@@ -50,6 +50,16 @@ async function apiRequest(url, options = {}) {
             return null;
         }
         
+        // 🆕 Handle 403 Permission Denied (RBAC)
+        if (response.status === 403) {
+            const error = await response.json();
+            const errorMessage = error.detail || 'Permission denied';
+            
+            // Show prominent permission denied message
+            showPermissionDeniedMessage(errorMessage);
+            throw new Error(errorMessage);
+        }
+        
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.detail || 'Request failed');
@@ -57,9 +67,45 @@ async function apiRequest(url, options = {}) {
         
         return response;
     } catch (error) {
-        showNotification('Request failed: ' + error.message, 'error');
+        // Don't show duplicate notification for 403 errors
+        if (!error.message.includes('Permission denied')) {
+            showNotification('Request failed: ' + error.message, 'error');
+        }
         throw error;
     }
+}
+
+// 🆕 UPDATED: Show permission denied message ONLY in chat (no popup notification)
+function showPermissionDeniedMessage(message) {
+    // REMOVED: showNotification(message, 'error');
+    
+    // Add to chat as a system message with special styling
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message system permission-denied';
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'message-avatar';
+    avatarDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+    
+    const textDiv = document.createElement('div');
+    textDiv.className = 'message-text';
+    textDiv.innerHTML = `
+        <strong>⚠️ Permission Denied</strong><br><br>
+        ${message}<br><br>
+        <em>Your current role: <strong>${currentUser?.role || 'analyst'}</strong></em><br>
+        <em>Only admin users can perform write operations (create, update, trigger, delete).</em>
+    `;
+    
+    contentDiv.appendChild(avatarDiv);
+    contentDiv.appendChild(textDiv);
+    messageDiv.appendChild(contentDiv);
+    
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 // Chat Functions
@@ -79,7 +125,10 @@ async function sendChatMessage(message) {
             return data.response;
         }
     } catch (error) {
-        showNotification('Failed to send message: ' + error.message, 'error');
+        // 🆕 UPDATED: Don't show popup notification for permission errors
+        if (!error.message.includes('Permission denied')) {
+            showNotification('Failed to send message: ' + error.message, 'error');
+        }
         throw error;
     }
 }
@@ -156,6 +205,14 @@ async function getUserInfo() {
         if (response) {
             currentUser = await response.json();
             document.getElementById('user-name').textContent = currentUser.full_name || currentUser.username;
+            
+            // 🆕 Display user role
+            const userRoleElement = document.getElementById('user-role');
+            if (userRoleElement) {
+                const roleDisplay = currentUser.role === 'admin' ? 'Admin' : 'Analyst';
+                const roleClass = currentUser.role === 'admin' ? 'role-admin' : 'role-analyst';
+                userRoleElement.innerHTML = `<span class="user-role-badge ${roleClass}">${roleDisplay}</span>`;
+            }
         }
     } catch (error) {
         console.error('Failed to get user info:', error);
@@ -252,7 +309,13 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             // Remove loading message
             loadingMessage.remove();
-            addChatMessage('Sorry, I encountered an error. Please try again.', false);
+            
+            // 🆕 UPDATED: Permission errors are already shown in chat by showPermissionDeniedMessage
+            // Don't add any additional error message for permission errors
+            if (!error.message.includes('Permission denied')) {
+                addChatMessage('❌ Sorry, I encountered an error. Please try again.', false);
+            }
+            // If it's a permission error, the message is already in the chat
         }
     });
     

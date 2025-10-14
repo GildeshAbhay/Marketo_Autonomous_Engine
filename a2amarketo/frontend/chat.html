@@ -24,9 +24,16 @@
             </div>
             <div class="header-actions">
                 <div class="user-info">
-                    <span id="user-name">User</span>
-                    <button id="logout-btn" class="btn btn-outline">
-                        <i class="fas fa-sign-out-alt"></i> Logout
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-details">
+                        <div id="user-name" class="user-name">Loading...</div>
+                        <!-- 🆕 Add this line -->
+                        <div id="user-role" class="user-role"></div>
+                    </div>
+                    <button id="logout-btn" class="btn-icon" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
                     </button>
                 </div>
             </div>

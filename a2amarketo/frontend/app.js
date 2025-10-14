@@ -167,6 +167,16 @@ async function apiRequest(url, options = {}) {
             }
         }
         
+        // 🆕 Handle 403 Permission Denied (RBAC)
+        if (response.status === 403) {
+            const error = await response.json();
+            const errorMessage = error.detail || 'Permission denied';
+            
+            // Show permission denied message ONLY in chat (no popup)
+            showPermissionDeniedInChat(errorMessage);
+            throw new Error(errorMessage);
+        }
+        
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.detail || 'Request failed');
@@ -174,8 +184,9 @@ async function apiRequest(url, options = {}) {
         
         return response;
     } catch (error) {
-        if (error.message.includes('Session expired')) {
-            showNotification(error.message, 'error');
+        // Don't show notification popup for 403 errors
+        if (!error.message.includes('Permission denied')) {
+            showNotification('Request failed: ' + error.message, 'error');
         }
         throw error;
     }
@@ -187,6 +198,24 @@ function logout() {
     refreshToken = null;
     currentSessionId = generateSessionId();
     showScreen('login-screen');
+}
+
+// 🆕 NEW: Show permission denied message ONLY in chat
+function showPermissionDeniedInChat(message) {
+    // REMOVED: showNotification(message, 'error');
+    
+    // Add to chat as a system message with special styling
+    addChatMessage(`
+        <div class="permission-denied-inline">
+            <div class="permission-icon">⚠️</div>
+            <div class="permission-content">
+                <strong>Permission Denied</strong><br>
+                ${message}<br><br>
+                <em>Your current role: <strong>${currentUser?.role || 'analyst'}</strong></em><br>
+                <em>Only admin users can perform write operations.</em>
+            </div>
+        </div>
+    `, false);
 }
 
 // Chat Functions
@@ -204,7 +233,10 @@ async function sendChatMessage(message) {
         const data = await response.json();
         return data.response;
     } catch (error) {
-        showNotification('Failed to send message: ' + error.message, 'error');
+        // 🆕 Don't show popup notification for permission errors
+        if (!error.message.includes('Permission denied')) {
+            showNotification('Failed to send message: ' + error.message, 'error');
+        }
         throw error;
     }
 }
@@ -438,18 +470,24 @@ document.addEventListener('DOMContentLoaded', function() {
         input.value = '';
         
         // Show loading message
-        const loadingMessage = addChatMessage('Thinking...', false);
+        const loadingMessage = addChatMessage('<div class="loading"></div> Thinking...', false);
         
         try {
             const response = await sendChatMessage(message);
             // Remove loading message
-            document.querySelector('.message:last-child').remove();
+            loadingMessage.remove();
             // Add actual response
             addChatMessage(response, false);
         } catch (error) {
             // Remove loading message
-            document.querySelector('.message:last-child').remove();
-            addChatMessage('Sorry, I encountered an error. Please try again.', false);
+            loadingMessage.remove();
+            
+            // 🆕 UPDATED: Permission errors are already shown in chat by showPermissionDeniedMessage
+            // Don't add any additional error message for permission errors
+            if (!error.message.includes('Permission denied')) {
+                addChatMessage('❌ Sorry, I encountered an error. Please try again.', false);
+            }
+            // If it's a permission error, the message is already in the chat
         }
     });
     
