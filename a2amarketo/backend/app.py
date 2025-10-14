@@ -4,6 +4,7 @@ from rbac import (
     ROLE_ADMIN,
     ROLE_ANALYST
 )
+from typing import Optional
 from functools import wraps
 from fastapi import Request, Depends
 import sys, os, uuid, asyncio, nest_asyncio, time
@@ -30,7 +31,7 @@ from config import settings
 from auth import (
     get_password_hash, authenticate_user, create_access_token, 
     create_refresh_token, get_current_active_user, verify_refresh_token,
-    get_user_by_username, get_user_by_email
+    get_user_by_username, get_user_by_email,require_analyst_or_admin,require_admin
 )
 
 nest_asyncio.apply()

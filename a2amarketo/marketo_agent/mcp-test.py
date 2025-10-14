@@ -18,8 +18,16 @@ async def test_mcp():
         # result = await client.call_tool("get_leads_by_filter_type", {"filter_type": "email", "filter_values": ["Munnim@grazitti.com"], "fields": ["id", "email", "first_name", "last_name", "company"], "batch_size": 100})
         # print("get_campaign result:", result)
 
-        result = await client.call_tool("get_campaign", {"campaign_id": "4567"})
+        result = await client.call_tool("get_campaign", {"campaign_id": "10979"})
+        print("get_campaign result:", result)
+        # result_2 = await client.call_tool("get_lead_by_id", {"lead_id": 6228, "fields": ["id", "email", "firstName", "lastName", "company"]})
+        # print("get_lead_by_id result:", result_2)
 
+        # result_1 = await client.call_tool("get_smart_list", {"smart_list_id": 26609})
+        # print("get_campaign result:", result_1)
+
+        result_1 = await client.call_tool("update_smart_campaign_by_id", {"smart_campaign_id": 10979 , "payload": {"name": "Change name testing 1"}})
+        print("smart campaign updated result:", result_1)
         # Optional: Test trigger_campaign (side-effecting; use real data cautiously)
         # payload = {"input": [{"id": your_lead_id}]}  # Uncomment with valid payload
         # trigger_result = await client.call_tool("trigger_campaign", {

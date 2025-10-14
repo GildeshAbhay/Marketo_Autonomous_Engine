@@ -70,6 +70,8 @@ print(f"Response get campaign : {response}")
 response = agent.get_lead_by_id(lead_id = 6228, fields=["id", "email", "firstName", "lastName", "company"])
 print(f"Response get lead by id : {response}")
 
+
+
 # response = agent.get_leads_by_filter_type(filter_type, filter_values, fields, batch_size)
 # print(f"Response get leads by filter type : {response}")
 

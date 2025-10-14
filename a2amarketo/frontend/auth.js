@@ -2,8 +2,8 @@
 // API Configuration
 // const API_BASE_URL = 'http://localhost:5000/api';
 const API_BASE_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5000'
-    : 'YOUR_BACKEND_CLOUD_RUN_URL';  // Will be set after deployment
+    ? 'http://localhost:5000/api'  // Add /api here
+    : 'YOUR_BACKEND_CLOUD_RUN_URL/api';  // Add /api here too
 
 // State Management
 let accessToken = null;
@@ -62,6 +62,10 @@ async function login(username, password) {
         const formData = new FormData();
         formData.append('username', username);
         formData.append('password', password);
+        
+        // ADD THIS DEBUG LINE
+        console.log('Login URL:', `${API_BASE_URL}/auth/login`);
+        console.log('API_BASE_URL:', API_BASE_URL);
         
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
@@ -131,7 +135,8 @@ document.addEventListener('DOMContentLoaded', function() {
             username: document.getElementById('reg-username').value,
             email: document.getElementById('reg-email').value,
             full_name: document.getElementById('reg-fullname').value,
-            password: document.getElementById('reg-password').value
+            password: document.getElementById('reg-password').value,
+            role: document.getElementById('reg-role').value  // ADD THIS LINE
         };
         
         try {
