@@ -33,6 +33,7 @@ from auth import (
     create_refresh_token, get_current_active_user, verify_refresh_token,
     get_user_by_username, get_user_by_email,require_analyst_or_admin,require_admin
 )
+import json
 
 nest_asyncio.apply()
 # Initialize FastAPI app
@@ -242,18 +243,15 @@ async def root():
 async def query_agent(
     request: QueryRequest,
     current_user: User = Depends(require_analyst_or_admin),
-    req: Request = None  # Add Request object
+    req: Request = None
 ):
     """
     Send a query to the Host Agent and get response.
-    This DIRECTLY calls the host agent.
+    This DIRECTLY calls the host agent with RBAC.
     **Requires authentication.**
     """
     if not host_agent_instance:
         raise HTTPException(status_code=503, detail="Host agent not initialized")
-
- # 🆕 NEW: Validate query permissions based on user role
-    validate_user_query_permission(request.query, current_user.role)
 
     # 🆕 Track API usage
     await track_api_usage(
@@ -265,17 +263,16 @@ async def query_agent(
     )
 
     try:
-        # Call host agent's stream method
+        # Call host agent's stream method WITH user role
         full_response = ""
         async for event in host_agent_instance.stream(
             query=request.query,
-            session_id=request.session_id
-            #user_role=current_user.role
+            session_id=request.session_id,
+            user_role=current_user.role  # 🆕 Pass user role to host agent
         ):
             if event.get("is_task_complete"):
                 full_response = event.get("content", "")
             else:
-                # You can log intermediate updates here
                 print(f"Agent update: {event.get('updates')}")
         
         # Save to database
@@ -294,6 +291,75 @@ async def query_agent(
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")
+
+@app.post("/api/query/stream")
+async def query_agent_stream(
+    request: QueryRequest,
+    current_user: User = Depends(require_analyst_or_admin),
+    req: Request = None
+):
+    """
+    Send a query to the Host Agent and get STREAMING response.
+    Returns Server-Sent Events (SSE) stream.
+    **Requires authentication.**
+    """
+    if not host_agent_instance:
+        raise HTTPException(status_code=503, detail="Host agent not initialized")
+
+    # Track API usage
+    await track_api_usage(
+        request=req,
+        current_user=current_user,
+        endpoint_type="query_stream",
+        query_text=request.query,
+        session_id=request.session_id
+    )
+
+    async def event_generator():
+        """Generator that yields SSE-formatted events."""
+        try:
+            full_response = ""
+            
+            # Stream events from host agent
+            async for event in host_agent_instance.stream(
+                query=request.query,
+                session_id=request.session_id,
+                user_role=current_user.role
+            ):
+                if event.get("is_task_complete"):
+                    full_response = event.get("content", "")
+                    # Send final response
+                    yield f"data: {json.dumps({'type': 'final', 'content': full_response, 'done': True})}\n\n"
+                else:
+                    # Send intermediate updates
+                    update_text = event.get("updates", "")
+                    yield f"data: {json.dumps({'type': 'update', 'content': update_text, 'done': False})}\n\n"
+            
+            # Save to database
+            await save_conversation(
+                session_id=request.session_id,
+                user_id=request.user_id,
+                query=request.query,
+                response=full_response
+            )
+            
+            # Send completion event
+            yield f"data: {json.dumps({'type': 'complete', 'done': True})}\n\n"
+            
+        except Exception as e:
+            # Send error event
+            error_msg = f"Error processing query: {str(e)}"
+            yield f"data: {json.dumps({'type': 'error', 'content': error_msg, 'done': True})}\n\n"
+    
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"  # Disable nginx buffering
+        }
+    )
 
 @app.get("/api/reports/templates")
 async def get_report_templates(current_user: User = Depends(require_analyst_or_admin)):

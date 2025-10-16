@@ -108,11 +108,17 @@ function showPermissionDeniedMessage(message) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-// Chat Functions
-async function sendChatMessage(message) {
+// Chat Functions - STREAMING VERSION
+async function sendChatMessageStream(message, messageDiv) {
+    const accessToken = sessionStorage.getItem('accessToken');
+    
     try {
-        const response = await apiRequest(`${API_BASE_URL}/query`, {
+        const response = await fetch(`${API_BASE_URL}/query/stream`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
             body: JSON.stringify({
                 query: message,
                 session_id: currentSessionId,
@@ -120,12 +126,59 @@ async function sendChatMessage(message) {
             })
         });
         
-        if (response) {
-            const data = await response.json();
-            return data.response;
+        if (response.status === 401) {
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('refreshToken');
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        if (response.status === 403) {
+            const error = await response.json();
+            showPermissionDeniedMessage(error.detail || 'Permission denied');
+            throw new Error('Permission denied');
+        }
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Request failed');
+        }
+        
+        // Handle streaming response
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            
+            if (done) break;
+            
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop(); // Keep incomplete line in buffer
+            
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    try {
+                        const data = JSON.parse(line.slice(6));
+                        
+                        if (data.type === 'update') {
+                            // Update message with intermediate content
+                            updateMessageContent(messageDiv, data.content, false);
+                        } else if (data.type === 'final') {
+                            // Update with final formatted content
+                            updateMessageContent(messageDiv, data.content, true);
+                        } else if (data.type === 'error') {
+                            updateMessageContent(messageDiv, `❌ Error: ${data.content}`, true);
+                        }
+                    } catch (e) {
+                        console.error('Error parsing SSE data:', e);
+                    }
+                }
+            }
         }
     } catch (error) {
-        // 🆕 UPDATED: Don't show popup notification for permission errors
         if (!error.message.includes('Permission denied')) {
             showNotification('Failed to send message: ' + error.message, 'error');
         }
@@ -133,7 +186,70 @@ async function sendChatMessage(message) {
     }
 }
 
-function addChatMessage(content, isUser = false) {
+function updateMessageContent(messageDiv, content, isFinal = false) {
+    const textDiv = messageDiv.querySelector('.message-text');
+    if (!textDiv) return;
+    
+    if (isFinal) {
+        // Render HTML directly (already HTML from the agent)
+        textDiv.innerHTML = sanitizeHTML(content);
+        
+        // Add syntax highlighting class for code blocks if needed
+        textDiv.querySelectorAll('pre code').forEach((block) => {
+            block.classList.add('code-block');
+        });
+    } else {
+        // Show loading indicator with intermediate text
+        textDiv.innerHTML = `<div class="typing-indicator">
+            <span></span><span></span><span></span>
+        </div> ${escapeHTML(content)}`;
+    }
+}
+
+// Helper function to sanitize HTML (basic XSS protection)
+function sanitizeHTML(html) {
+    // Create a temporary div to parse the HTML
+    const temp = document.createElement('div');
+    temp.textContent = html; // This escapes everything first
+    
+    // Now we'll selectively allow safe HTML tags
+    const allowedTags = ['p', 'strong', 'em', 'b', 'i', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                         'ul', 'ol', 'li', 'br', 'code', 'pre', 'table', 'thead', 'tbody', 
+                         'tr', 'th', 'td', 'div', 'span', 'blockquote', 'a', 'hr'];
+    
+    // Parse the HTML string
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    // Remove any script tags or dangerous attributes
+    doc.querySelectorAll('script, iframe, object, embed').forEach(el => el.remove());
+    doc.querySelectorAll('*').forEach(el => {
+        // Remove event handlers
+        Array.from(el.attributes).forEach(attr => {
+            if (attr.name.startsWith('on')) {
+                el.removeAttribute(attr.name);
+            }
+        });
+        // Only allow href on <a> tags
+        if (el.tagName.toLowerCase() === 'a') {
+            const href = el.getAttribute('href');
+            if (href && !href.startsWith('http://') && !href.startsWith('https://')) {
+                el.removeAttribute('href');
+            }
+        }
+    });
+    
+    return doc.body.innerHTML;
+}
+
+// Helper to escape HTML for non-final content
+function escapeHTML(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function addChatMessage(content, isUser = false, isPlaceholder = false) {
     const messagesContainer = document.getElementById('chat-messages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user' : 'system'}`;
@@ -147,7 +263,19 @@ function addChatMessage(content, isUser = false) {
     
     const textDiv = document.createElement('div');
     textDiv.className = 'message-text';
-    textDiv.innerHTML = content.replace(/\n/g, '<br>');
+    
+    if (isPlaceholder) {
+        // For bot placeholder messages (will be updated via streaming)
+        textDiv.innerHTML = `<div class="typing-indicator">
+            <span></span><span></span><span></span>
+        </div> Thinking...`;
+    } else if (isUser) {
+        // User messages - plain text (escaped for security)
+        textDiv.textContent = content;
+    } else {
+        // Bot messages - render as HTML (already sanitized)
+        textDiv.innerHTML = sanitizeHTML(content);
+    }
     
     contentDiv.appendChild(avatarDiv);
     contentDiv.appendChild(textDiv);
@@ -285,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Logout button
     document.getElementById('logout-btn').addEventListener('click', logout);
     
-    // Chat form
+    // Chat form - UPDATED FOR STREAMING
     document.getElementById('chat-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const input = document.getElementById('chat-input');
@@ -297,25 +425,20 @@ document.addEventListener('DOMContentLoaded', function() {
         addChatMessage(message, true);
         input.value = '';
         
-        // Show loading message
-        const loadingMessage = addChatMessage('<div class="loading"></div> Thinking...', false);
+        // Add placeholder message for bot (will be updated via streaming)
+        const botMessage = addChatMessage('', false, true);
         
         try {
-            const response = await sendChatMessage(message);
-            // Remove loading message
-            loadingMessage.remove();
-            // Add actual response
-            addChatMessage(response, false);
+            await sendChatMessageStream(message, botMessage);
         } catch (error) {
-            // Remove loading message
-            loadingMessage.remove();
-            
-            // 🆕 UPDATED: Permission errors are already shown in chat by showPermissionDeniedMessage
-            // Don't add any additional error message for permission errors
+            // Remove placeholder message on error
             if (!error.message.includes('Permission denied')) {
+                botMessage.remove();
                 addChatMessage('❌ Sorry, I encountered an error. Please try again.', false);
+            } else {
+                // Permission denied message already shown
+                botMessage.remove();
             }
-            // If it's a permission error, the message is already in the chat
         }
     });
     
