@@ -260,4 +260,72 @@ class MarketoClient:
             params["nextPageToken"] = next_page_token
         return self._request("GET", path, params=params)
 
+    def get_program_by_id(self, program_id: int) -> Dict[str, Any]:
+        """Get a program by its ID.
+        Endpoint: GET /rest/asset/v1/program/{id}.json
+        
+        Args:
+            program_id: The Marketo program ID
+        
+        Returns:
+            Dictionary containing program details
+        """
+        path = f"/rest/asset/v1/program/{program_id}.json"
+        return self._request("GET", path)
+
+    def get_program_by_name(
+        self, 
+        name: str, 
+        include_tags: bool = False,
+        include_costs: bool = False
+    ) -> Dict[str, Any]:
+        """Get a program by its name.
+        Endpoint: GET /rest/asset/v1/program/byName.json
+        
+        Args:
+            name: Name of the program
+            include_tags: Set true to populate program tags
+            include_costs: Set true to populate program costs
+        
+        Returns:
+            Dictionary containing program details
+        """
+        path = "/rest/asset/v1/program/byName.json"
+        params = {"name": name}
+        if include_tags:
+            params["includeTags"] = "true"
+        if include_costs:
+            params["includeCosts"] = "true"
+        return self._request("GET", path, params=params)
+
+    def clone_program(
+        self, 
+        program_id: int, 
+        name: str,
+        folder_id: int,
+        folder_type: str,
+        description: str = ""
+    ) -> Dict[str, Any]:
+        """Clone an existing program.
+        Endpoint: POST /rest/asset/v1/program/{id}/clone.json
+        
+        Args:
+            program_id: The ID of the program to clone
+            name: Name of the new program (max 255 characters)
+            folder_id: ID of the folder to create the cloned program in
+            folder_type: Type of folder (e.g., 'Folder' or 'Program')
+            description: Optional description of the cloned program
+        
+        Returns:
+            API response with cloned program details
+        """
+        path = f"/rest/asset/v1/program/{program_id}/clone.json"
+        data = {
+            "name": name,
+            "folder": json.dumps({"id": folder_id, "type": folder_type})
+        }
+        if description:
+            data["description"] = description
+        return self._request_form("POST", path, data=data)
+
 

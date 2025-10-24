@@ -211,6 +211,52 @@ def get_leads_by_smart_list(smart_list_id: int, fields: list = None, batch_size:
     """
     return agent.get_leads_by_smart_list(smart_list_id, fields, batch_size, next_page_token)
 
+@mcp.tool()
+def get_program_by_id(program_id: int) -> dict:
+    """
+    Retrieve a specific program by ID from Marketo.
+
+    Args:
+        program_id: The Marketo program ID.
+
+    Returns:
+        Program details as a dictionary.
+    """
+    return agent.get_program_by_id(program_id)
+
+@mcp.tool()
+def get_program_by_name(name: str, include_tags: bool = False, include_costs: bool = False) -> dict:
+    """
+    Retrieve a program by its name from Marketo.
+
+    Args:
+        name: Name of the program.
+        include_tags: Set true to populate program tags.
+        include_costs: Set true to populate program costs.
+
+    Returns:
+        Program details as a dictionary.
+    """
+    return agent.get_program_by_name(name, include_tags, include_costs)
+
+@mcp.tool()
+def clone_program(program_id: int, name: str, folder_id: int, folder_type: str, description: str = "") -> dict:
+    """
+    Clone an existing Marketo program.
+
+    Args:
+        program_id: The ID of the program to clone.
+        name: Name of the new cloned program (max 255 characters).
+        folder_id: The ID of the folder where the cloned program will be created.
+        folder_type: The type of the folder - must be either 'Folder' or 'Program'.
+        description: Optional description for the cloned program.
+
+    Returns:
+        API response from Marketo containing the cloned program details.
+    """
+    return agent.clone_program(program_id, name, folder_id, folder_type, description)
+
+
 # ToDo: Added in Future
 # @mcp.tool()
 # def get_campaign_details(campaign_id: int) -> dict:

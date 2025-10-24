@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
@@ -8,5 +8,7 @@ COPY . .
 # Expose port
 EXPOSE 8080
 
-# Run the server (update server.py to use PORT env var)
-CMD python server.py
+ENV PORT=8080
+
+# Run the server
+CMD exec python server.py

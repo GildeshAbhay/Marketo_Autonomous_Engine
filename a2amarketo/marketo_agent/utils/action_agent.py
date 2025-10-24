@@ -72,6 +72,45 @@ class ActionAgent:
         """Get leads that are members of a specific Smart List."""
         return self.client.get_leads_by_smart_list(smart_list_id, fields, batch_size, next_page_token)
 
+    def get_program_by_id(self, program_id: int) -> Dict[str, Any]:
+        """Fetch a program by ID."""
+        if not isinstance(program_id, int):
+            raise ValueError("program_id must be an integer")
+        return self.client.get_program_by_id(program_id)
+
+    def get_program_by_name(
+        self, 
+        name: str, 
+        include_tags: bool = False,
+        include_costs: bool = False
+    ) -> Dict[str, Any]:
+        """Fetch a program by name with optional tags and costs."""
+        if not name or not isinstance(name, str):
+            raise ValueError("name must be a non-empty string")
+        return self.client.get_program_by_name(name, include_tags, include_costs)
+
+    def clone_program(
+        self, 
+        program_id: int, 
+        name: str,
+        folder_id: int,
+        folder_type: str,
+        description: str = ""
+    ) -> Dict[str, Any]:
+        """Clone an existing program."""
+        if not isinstance(program_id, int):
+            raise ValueError("program_id must be an integer")
+        if not name or not isinstance(name, str):
+            raise ValueError("name must be a non-empty string")
+        if len(name) > 255:
+            raise ValueError("name must not exceed 255 characters")
+        if not isinstance(folder_id, int):
+            raise ValueError("folder_id must be an integer")
+        if folder_type not in ["Folder", "Program"]:
+            raise ValueError("folder_type must be 'Folder' or 'Program'")
+        
+        return self.client.clone_program(program_id, name, folder_id, folder_type, description)
+
 
 # if ADK_AVAILABLE:
 #     print("ADK is available")
