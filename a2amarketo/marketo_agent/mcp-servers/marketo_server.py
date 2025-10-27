@@ -255,6 +255,253 @@ def clone_program(program_id: int, name: str, folder_id: int, folder_type: str, 
         API response from Marketo containing the cloned program details.
     """
     return agent.clone_program(program_id, name, folder_id, folder_type, description)
+##--------------------------------------------------------------------------------------------------------------------------
+# Token Update Tools
+@mcp.tool()
+def get_program_tokens(program_id: int) -> dict:
+    """
+    Get My Tokens from a Marketo program.
+
+    Args:
+        program_id: The Marketo program ID.
+
+    Returns:
+        Dictionary containing program tokens.
+    """
+    return agent.get_program_tokens(program_id)
+
+@mcp.tool()
+def update_program_tokens(program_id: int, tokens: dict) -> dict:
+    """
+    Auto-populate My Tokens in a Marketo program.
+
+    Args:
+        program_id: The Marketo program ID.
+        tokens: Dictionary mapping token names to values.
+
+    Returns:
+        API response with updated token details.
+    """
+    return agent.update_program_tokens(program_id, tokens)
+
+# Email Update Tools
+@mcp.tool()
+def get_program_emails(program_id: int) -> dict:
+    """
+    Get all email assets from a Marketo program.
+
+    Args:
+        program_id: The Marketo program ID.
+
+    Returns:
+        Dictionary containing list of email assets.
+    """
+    return agent.get_program_emails(program_id)
+
+@mcp.tool()
+def get_email_content(email_id: int) -> dict:
+    """
+    Get email content including subject line and body.
+
+    Args:
+        email_id: The Marketo email asset ID.
+
+    Returns:
+        Dictionary containing email content variables.
+    """
+    return agent.get_email_content(email_id)
+
+@mcp.tool()
+def update_email_content(email_id: int, content_updates: dict) -> dict:
+    """
+    Update email content variables like subject line and body.
+
+    Args:
+        email_id: The Marketo email asset ID.
+        content_updates: Dictionary mapping content IDs to new values.
+
+    Returns:
+        API response with updated email content details.
+    """
+    return agent.update_email_content(email_id, content_updates)
+
+@mcp.tool()
+def approve_email(email_id: int) -> dict:
+    """
+    Approve an email asset.
+
+    Args:
+        email_id: The Marketo email asset ID.
+
+    Returns:
+        API response confirming email approval.
+    """
+    return agent.approve_email(email_id)
+
+# Landing Page Update Tools
+@mcp.tool()
+def get_program_landing_pages(program_id: int) -> dict:
+    """
+    Get all landing page assets from a Marketo program.
+
+    Args:
+        program_id: The Marketo program ID.
+
+    Returns:
+        Dictionary containing list of landing page assets.
+    """
+    return agent.get_program_landing_pages(program_id)
+
+@mcp.tool()
+def get_landing_page_content(landing_page_id: int) -> dict:
+    """
+    Get landing page content sections.
+
+    Args:
+        landing_page_id: The Marketo landing page asset ID.
+
+    Returns:
+        Dictionary containing landing page editable content sections.
+    """
+    return agent.get_landing_page_content(landing_page_id)
+
+@mcp.tool()
+def update_landing_page_content(landing_page_id: int, content_updates: dict) -> dict:
+    """
+    Update landing page editable sections, CTAs, banners, forms.
+
+    Args:
+        landing_page_id: The Marketo landing page asset ID.
+        content_updates: Dictionary mapping content section IDs to new values.
+
+    Returns:
+        API response with updated landing page content details.
+    """
+    return agent.update_landing_page_content(landing_page_id, content_updates)
+
+@mcp.tool()
+def approve_landing_page(landing_page_id: int) -> dict:
+    """
+    Approve a landing page asset.
+
+    Args:
+        landing_page_id: The Marketo landing page asset ID.
+
+    Returns:
+        API response confirming landing page approval.
+    """
+    return agent.approve_landing_page(landing_page_id)
+
+# Smart List Tools
+@mcp.tool()
+def get_smart_list_rules(smart_list_id: int) -> dict:
+    """
+    Get smart list filter rules.
+
+    Args:
+        smart_list_id: The Marketo smart list ID.
+
+    Returns:
+        Dictionary containing smart list filter rules and criteria.
+    """
+    return agent.get_smart_list_rules(smart_list_id)
+
+@mcp.tool()
+def update_smart_list_rules(smart_list_id: int, rules: dict) -> dict:
+    """
+    Update smart list filter criteria.
+
+    Args:
+        smart_list_id: The Marketo smart list ID.
+        rules: Dictionary containing new filter rules and criteria.
+
+    Returns:
+        API response with updated smart list rules.
+    """
+    return agent.update_smart_list_rules(smart_list_id, rules)
+
+# Smart Campaign Tools
+@mcp.tool()
+def get_smart_campaign_rules(campaign_id: int) -> dict:
+    """
+    Get smart campaign smart list rules.
+
+    Args:
+        campaign_id: The Marketo smart campaign ID.
+
+    Returns:
+        Dictionary containing smart campaign filter rules.
+    """
+    return agent.get_smart_campaign_rules(campaign_id)
+
+@mcp.tool()
+def update_smart_campaign_rules(campaign_id: int, rules: dict) -> dict:
+    """
+    Update smart campaign filter criteria.
+
+    Args:
+        campaign_id: The Marketo smart campaign ID.
+        rules: Dictionary containing new filter rules and criteria.
+
+    Returns:
+        API response with updated smart campaign rules.
+    """
+    return agent.update_smart_campaign_rules(campaign_id, rules)
+
+@mcp.tool()
+def get_smart_campaign_flow(campaign_id: int) -> dict:
+    """
+    Get smart campaign flow steps.
+
+    Args:
+        campaign_id: The Marketo smart campaign ID.
+
+    Returns:
+        Dictionary containing smart campaign flow steps.
+    """
+    return agent.get_smart_campaign_flow(campaign_id)
+
+@mcp.tool()
+def update_smart_campaign_flow(campaign_id: int, flow_steps: dict) -> dict:
+    """
+    Update smart campaign flow based on requirements.
+
+    Args:
+        campaign_id: The Marketo smart campaign ID.
+        flow_steps: Dictionary containing new flow steps and actions.
+
+    Returns:
+        API response with updated smart campaign flow.
+    """
+    return agent.update_smart_campaign_flow(campaign_id, flow_steps)
+
+@mcp.tool()
+def activate_smart_campaign(campaign_id: int) -> dict:
+    """
+    Activate a smart campaign.
+
+    Args:
+        campaign_id: The Marketo smart campaign ID.
+
+    Returns:
+        API response confirming campaign activation.
+    """
+    return agent.activate_smart_campaign(campaign_id)
+
+@mcp.tool()
+def schedule_smart_campaign(campaign_id: int, run_at: str, recipients: dict = None) -> dict:
+    """
+    Schedule a smart campaign to run at specified time.
+
+    Args:
+        campaign_id: The Marketo smart campaign ID.
+        run_at: ISO 8601 datetime string for when to run the campaign.
+        recipients: Optional dictionary containing recipient criteria.
+
+    Returns:
+        API response confirming campaign scheduling.
+    """
+    return agent.schedule_smart_campaign(campaign_id, run_at, recipients)
 
 
 # ToDo: Added in Future

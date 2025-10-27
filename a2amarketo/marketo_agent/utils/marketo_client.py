@@ -328,4 +328,265 @@ class MarketoClient:
             data["description"] = description
         return self._request_form("POST", path, data=data)
 
+    # Token Update Functions
+    def get_program_tokens(self, program_id: int) -> Dict[str, Any]:
+        """Get My Tokens from a program.
+        Endpoint: GET /rest/asset/v1/program/{id}/tokens.json
+        
+        Args:
+            program_id: The Marketo program ID
+        
+        Returns:
+            Dictionary containing program tokens
+        """
+        path = f"/rest/asset/v1/program/{program_id}/tokens.json"
+        return self._request("GET", path)
+
+    def update_program_tokens(self, program_id: int, tokens: Dict[str, str]) -> Dict[str, Any]:
+        """Auto-populate My Tokens in a program.
+        Endpoint: POST /rest/asset/v1/program/{id}/tokens.json
+        
+        Args:
+            program_id: The Marketo program ID
+            tokens: Dictionary mapping token names to values
+        
+        Returns:
+            API response with updated token details
+        """
+        path = f"/rest/asset/v1/program/{program_id}/tokens.json"
+        data = {}
+        for token_name, value in tokens.items():
+            data[f"tokens[{token_name}]"] = value
+        return self._request_form("POST", path, data=data)
+
+##--------------------------------------------------------------------------------------------------------------
+
+    # Email Updates Functions
+    def get_program_emails(self, program_id: int) -> Dict[str, Any]:
+        """Get all email assets from a program.
+        Endpoint: GET /rest/asset/v1/program/{id}/emails.json
+        
+        Args:
+            program_id: The Marketo program ID
+        
+        Returns:
+            Dictionary containing list of email assets in the program
+        """
+        path = f"/rest/asset/v1/program/{program_id}/emails.json"
+        return self._request("GET", path)
+
+    def get_email_content(self, email_id: int) -> Dict[str, Any]:
+        """Get email content including subject line and body.
+        Endpoint: GET /rest/asset/v1/email/{id}/content.json
+        
+        Args:
+            email_id: The Marketo email asset ID
+        
+        Returns:
+            Dictionary containing email content variables (subject, body, etc.)
+        """
+        path = f"/rest/asset/v1/email/{email_id}/content.json"
+        return self._request("GET", path)
+
+    def update_email_content(self, email_id: int, content_updates: Dict[str, str]) -> Dict[str, Any]:
+        """Update email content variables like subject line and body.
+        Endpoint: POST /rest/asset/v1/email/{id}/content.json
+        
+        Args:
+            email_id: The Marketo email asset ID
+            content_updates: Dictionary mapping content IDs to new values
+        
+        Returns:
+            API response with updated email content details
+        """
+        path = f"/rest/asset/v1/email/{email_id}/content.json"
+        data = {}
+        for content_id, value in content_updates.items():
+            data[f"content[{content_id}]"] = value
+        return self._request_form("POST", path, data=data)
+
+    def approve_email(self, email_id: int) -> Dict[str, Any]:
+        """Approve an email asset.
+        Endpoint: POST /rest/asset/v1/email/{id}/approveDraft.json
+        
+        Args:
+            email_id: The Marketo email asset ID
+        
+        Returns:
+            API response confirming email approval
+        """
+        path = f"/rest/asset/v1/email/{email_id}/approveDraft.json"
+        return self._request_form("POST", path)
+
+    # Landing Page Updates Functions
+    def get_program_landing_pages(self, program_id: int) -> Dict[str, Any]:
+        """Get all landing page assets from a program.
+        Endpoint: GET /rest/asset/v1/program/{id}/landingPages.json
+        
+        Args:
+            program_id: The Marketo program ID
+        
+        Returns:
+            Dictionary containing list of landing page assets in the program
+        """
+        path = f"/rest/asset/v1/program/{program_id}/landingPages.json"
+        return self._request("GET", path)
+
+    def get_landing_page_content(self, landing_page_id: int) -> Dict[str, Any]:
+        """Get landing page content sections.
+        Endpoint: GET /rest/asset/v1/landingPage/{id}/content.json
+        
+        Args:
+            landing_page_id: The Marketo landing page asset ID
+        
+        Returns:
+            Dictionary containing landing page editable content sections
+        """
+        path = f"/rest/asset/v1/landingPage/{landing_page_id}/content.json"
+        return self._request("GET", path)
+
+    def update_landing_page_content(self, landing_page_id: int, content_updates: Dict[str, str]) -> Dict[str, Any]:
+        """Update landing page editable sections, CTAs, banners, forms.
+        Endpoint: POST /rest/asset/v1/landingPage/{id}/content.json
+        
+        Args:
+            landing_page_id: The Marketo landing page asset ID
+            content_updates: Dictionary mapping content section IDs to new values
+        
+        Returns:
+            API response with updated landing page content details
+        """
+        path = f"/rest/asset/v1/landingPage/{landing_page_id}/content.json"
+        data = {}
+        for content_id, value in content_updates.items():
+            data[f"content[{content_id}]"] = value
+        return self._request_form("POST", path, data=data)
+
+    def approve_landing_page(self, landing_page_id: int) -> Dict[str, Any]:
+        """Approve a landing page asset.
+        Endpoint: POST /rest/asset/v1/landingPage/{id}/approveDraft.json
+        
+        Args:
+            landing_page_id: The Marketo landing page asset ID
+        
+        Returns:
+            API response confirming landing page approval
+        """
+        path = f"/rest/asset/v1/landingPage/{landing_page_id}/approveDraft.json"
+        return self._request_form("POST", path)
+
+    # Smart Lists Functions
+    def get_smart_list_rules(self, smart_list_id: int) -> Dict[str, Any]:
+        """Get smart list filter rules.
+        Endpoint: GET /rest/asset/v1/smartList/{id}/smartListRules.json
+        
+        Args:
+            smart_list_id: The Marketo smart list ID
+        
+        Returns:
+            Dictionary containing smart list filter rules and criteria
+        """
+        path = f"/rest/asset/v1/smartList/{smart_list_id}/smartListRules.json"
+        return self._request("GET", path)
+
+    def update_smart_list_rules(self, smart_list_id: int, rules: Dict[str, Any]) -> Dict[str, Any]:
+        """Update smart list filter criteria.
+        Endpoint: POST /rest/asset/v1/smartList/{id}/smartListRules.json
+        
+        Args:
+            smart_list_id: The Marketo smart list ID
+            rules: Dictionary containing new filter rules and criteria
+        
+        Returns:
+            API response with updated smart list rules
+        """
+        path = f"/rest/asset/v1/smartList/{smart_list_id}/smartListRules.json"
+        return self._request("POST", path, json=rules)
+
+    # Smart Campaigns Functions
+    def get_smart_campaign_rules(self, campaign_id: int) -> Dict[str, Any]:
+        """Get smart campaign smart list rules.
+        Endpoint: GET /rest/asset/v1/smartCampaign/{id}/smartListRules.json
+        
+        Args:
+            campaign_id: The Marketo smart campaign ID
+        
+        Returns:
+            Dictionary containing smart campaign filter rules
+        """
+        path = f"/rest/asset/v1/smartCampaign/{campaign_id}/smartListRules.json"
+        return self._request("GET", path)
+
+    def update_smart_campaign_rules(self, campaign_id: int, rules: Dict[str, Any]) -> Dict[str, Any]:
+        """Update smart campaign filter criteria.
+        Endpoint: POST /rest/asset/v1/smartCampaign/{id}/smartListRules.json
+        
+        Args:
+            campaign_id: The Marketo smart campaign ID
+            rules: Dictionary containing new filter rules and criteria
+        
+        Returns:
+            API response with updated smart campaign rules
+        """
+        path = f"/rest/asset/v1/smartCampaign/{campaign_id}/smartListRules.json"
+        return self._request("POST", path, json=rules)
+
+    def get_smart_campaign_flow(self, campaign_id: int) -> Dict[str, Any]:
+        """Get smart campaign flow steps.
+        Endpoint: GET /rest/asset/v1/smartCampaign/{id}/flow.json
+        
+        Args:
+            campaign_id: The Marketo smart campaign ID
+        
+        Returns:
+            Dictionary containing smart campaign flow steps
+        """
+        path = f"/rest/asset/v1/smartCampaign/{campaign_id}/flow.json"
+        return self._request("GET", path)
+
+    def update_smart_campaign_flow(self, campaign_id: int, flow_steps: Dict[str, Any]) -> Dict[str, Any]:
+        """Update smart campaign flow based on requirements.
+        Endpoint: POST /rest/asset/v1/smartCampaign/{id}/flow.json
+        
+        Args:
+            campaign_id: The Marketo smart campaign ID
+            flow_steps: Dictionary containing new flow steps and actions
+        
+        Returns:
+            API response with updated smart campaign flow
+        """
+        path = f"/rest/asset/v1/smartCampaign/{campaign_id}/flow.json"
+        return self._request("POST", path, json=flow_steps)
+
+    def activate_smart_campaign(self, campaign_id: int) -> Dict[str, Any]:
+        """Activate a smart campaign.
+        Endpoint: POST /rest/asset/v1/smartCampaign/{id}/activate.json
+        
+        Args:
+            campaign_id: The Marketo smart campaign ID
+        
+        Returns:
+            API response confirming campaign activation
+        """
+        path = f"/rest/asset/v1/smartCampaign/{campaign_id}/activate.json"
+        return self._request_form("POST", path)
+
+    def schedule_smart_campaign(self, campaign_id: int, run_at: str, recipients: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Schedule a smart campaign to run at specified time.
+        Endpoint: POST /rest/asset/v1/smartCampaign/{id}/schedule.json
+        
+        Args:
+            campaign_id: The Marketo smart campaign ID
+            run_at: ISO 8601 datetime string for when to run the campaign
+            recipients: Optional dictionary containing recipient criteria
+        
+        Returns:
+            API response confirming campaign scheduling
+        """
+        path = f"/rest/asset/v1/smartCampaign/{campaign_id}/schedule.json"
+        data = {"runAt": run_at}
+        if recipients:
+            data.update(recipients)
+        return self._request_form("POST", path, data=data)
+
 

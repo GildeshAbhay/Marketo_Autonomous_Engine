@@ -43,7 +43,7 @@ class ActionAgent:
         # Basic validation example
         if not isinstance(campaign_id, int):
             raise ValueError("campaign_id must be int")
-            return self.client.trigger_campaign(campaign_id, input_payload)
+        return self.client.trigger_campaign(campaign_id, input_payload)
 
     def get_smart_list(self, smart_list_id: int) -> Dict[str, Any]:
         return self.client.get_smart_list(smart_list_id)
@@ -110,6 +110,260 @@ class ActionAgent:
             raise ValueError("folder_type must be 'Folder' or 'Program'")
         
         return self.client.clone_program(program_id, name, folder_id, folder_type, description)
+
+    # Token Update Actions
+    def get_program_tokens(self, program_id: int) -> Dict[str, Any]:
+        """Get My Tokens from a program."""
+        if not isinstance(program_id, int):
+            raise ValueError("program_id must be an integer")
+        return self.client.get_program_tokens(program_id)
+
+    def update_program_tokens(self, program_id: int, tokens: Dict[str, str]) -> Dict[str, Any]:
+        """Auto-populate My Tokens in a program."""
+        if not isinstance(program_id, int):
+            raise ValueError("program_id must be an integer")
+        if not tokens or not isinstance(tokens, dict):
+            raise ValueError("tokens must be a non-empty dictionary")
+        return self.client.update_program_tokens(program_id, tokens)
+
+    # Email Update Actions
+    def get_program_emails(self, program_id: int) -> Dict[str, Any]:
+        """Get all email assets from a program."""
+        if not isinstance(program_id, int):
+            raise ValueError("program_id must be an integer")
+        return self.client.get_program_emails(program_id)
+
+    def get_email_content(self, email_id: int) -> Dict[str, Any]:
+        """Get email content including subject line and body."""
+        if not isinstance(email_id, int):
+            raise ValueError("email_id must be an integer")
+        return self.client.get_email_content(email_id)
+
+    def update_email_content(self, email_id: int, content_updates: Dict[str, str]) -> Dict[str, Any]:
+        """Update email content variables."""
+        if not isinstance(email_id, int):
+            raise ValueError("email_id must be an integer")
+        if not content_updates or not isinstance(content_updates, dict):
+            raise ValueError("content_updates must be a non-empty dictionary")
+        return self.client.update_email_content(email_id, content_updates)
+
+    def approve_email(self, email_id: int) -> Dict[str, Any]:
+        """Approve an email asset."""
+        if not isinstance(email_id, int):
+            raise ValueError("email_id must be an integer")
+        return self.client.approve_email(email_id)
+
+    # Landing Page Update Actions
+    def get_program_landing_pages(self, program_id: int) -> Dict[str, Any]:
+        """Get all landing page assets from a program."""
+        if not isinstance(program_id, int):
+            raise ValueError("program_id must be an integer")
+        return self.client.get_program_landing_pages(program_id)
+
+    def get_landing_page_content(self, landing_page_id: int) -> Dict[str, Any]:
+        """Get landing page content sections."""
+        if not isinstance(landing_page_id, int):
+            raise ValueError("landing_page_id must be an integer")
+        return self.client.get_landing_page_content(landing_page_id)
+
+    def update_landing_page_content(self, landing_page_id: int, content_updates: Dict[str, str]) -> Dict[str, Any]:
+        """Update landing page editable sections."""
+        if not isinstance(landing_page_id, int):
+            raise ValueError("landing_page_id must be an integer")
+        if not content_updates or not isinstance(content_updates, dict):
+            raise ValueError("content_updates must be a non-empty dictionary")
+        return self.client.update_landing_page_content(landing_page_id, content_updates)
+
+    def approve_landing_page(self, landing_page_id: int) -> Dict[str, Any]:
+        """Approve a landing page asset."""
+        if not isinstance(landing_page_id, int):
+            raise ValueError("landing_page_id must be an integer")
+        return self.client.approve_landing_page(landing_page_id)
+
+    # Smart List Actions
+    def get_smart_list_rules(self, smart_list_id: int) -> Dict[str, Any]:
+        """Get smart list filter rules."""
+        if not isinstance(smart_list_id, int):
+            raise ValueError("smart_list_id must be an integer")
+        return self.client.get_smart_list_rules(smart_list_id)
+
+    def update_smart_list_rules(self, smart_list_id: int, rules: Dict[str, Any]) -> Dict[str, Any]:
+        """Update smart list filter criteria."""
+        if not isinstance(smart_list_id, int):
+            raise ValueError("smart_list_id must be an integer")
+        if not rules or not isinstance(rules, dict):
+            raise ValueError("rules must be a non-empty dictionary")
+        return self.client.update_smart_list_rules(smart_list_id, rules)
+
+    # Smart Campaign Actions
+    def get_smart_campaign_rules(self, campaign_id: int) -> Dict[str, Any]:
+        """Get smart campaign smart list rules."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        return self.client.get_smart_campaign_rules(campaign_id)
+
+    def update_smart_campaign_rules(self, campaign_id: int, rules: Dict[str, Any]) -> Dict[str, Any]:
+        """Update smart campaign filter criteria."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        if not rules or not isinstance(rules, dict):
+            raise ValueError("rules must be a non-empty dictionary")
+        return self.client.update_smart_campaign_rules(campaign_id, rules)
+
+    def get_smart_campaign_flow(self, campaign_id: int) -> Dict[str, Any]:
+        """Get smart campaign flow steps."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        return self.client.get_smart_campaign_flow(campaign_id)
+
+    def update_smart_campaign_flow(self, campaign_id: int, flow_steps: Dict[str, Any]) -> Dict[str, Any]:
+        """Update smart campaign flow."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        if not flow_steps or not isinstance(flow_steps, dict):
+            raise ValueError("flow_steps must be a non-empty dictionary")
+        return self.client.update_smart_campaign_flow(campaign_id, flow_steps)
+
+    def activate_smart_campaign(self, campaign_id: int) -> Dict[str, Any]:
+        """Activate a smart campaign."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        return self.client.activate_smart_campaign(campaign_id)
+
+    def schedule_smart_campaign(self, campaign_id: int, run_at: str, recipients: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Schedule a smart campaign."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        if not run_at or not isinstance(run_at, str):
+            raise ValueError("run_at must be a non-empty string")
+        return self.client.schedule_smart_campaign(campaign_id, run_at, recipients)
+
+    # Token Update Actions
+    def get_program_tokens(self, program_id: int) -> Dict[str, Any]:
+        """Get My Tokens from a program."""
+        if not isinstance(program_id, int):
+            raise ValueError("program_id must be an integer")
+        return self.client.get_program_tokens(program_id)
+
+    def update_program_tokens(self, program_id: int, tokens: Dict[str, str]) -> Dict[str, Any]:
+        """Auto-populate My Tokens in a program."""
+        if not isinstance(program_id, int):
+            raise ValueError("program_id must be an integer")
+        if not tokens or not isinstance(tokens, dict):
+            raise ValueError("tokens must be a non-empty dictionary")
+        return self.client.update_program_tokens(program_id, tokens)
+
+    # Email Update Actions
+    def get_program_emails(self, program_id: int) -> Dict[str, Any]:
+        """Get all email assets from a program."""
+        if not isinstance(program_id, int):
+            raise ValueError("program_id must be an integer")
+        return self.client.get_program_emails(program_id)
+
+    def get_email_content(self, email_id: int) -> Dict[str, Any]:
+        """Get email content including subject line and body."""
+        if not isinstance(email_id, int):
+            raise ValueError("email_id must be an integer")
+        return self.client.get_email_content(email_id)
+
+    def update_email_content(self, email_id: int, content_updates: Dict[str, str]) -> Dict[str, Any]:
+        """Update email content variables."""
+        if not isinstance(email_id, int):
+            raise ValueError("email_id must be an integer")
+        if not content_updates or not isinstance(content_updates, dict):
+            raise ValueError("content_updates must be a non-empty dictionary")
+        return self.client.update_email_content(email_id, content_updates)
+
+    def approve_email(self, email_id: int) -> Dict[str, Any]:
+        """Approve an email asset."""
+        if not isinstance(email_id, int):
+            raise ValueError("email_id must be an integer")
+        return self.client.approve_email(email_id)
+
+    # Landing Page Update Actions
+    def get_program_landing_pages(self, program_id: int) -> Dict[str, Any]:
+        """Get all landing page assets from a program."""
+        if not isinstance(program_id, int):
+            raise ValueError("program_id must be an integer")
+        return self.client.get_program_landing_pages(program_id)
+
+    def get_landing_page_content(self, landing_page_id: int) -> Dict[str, Any]:
+        """Get landing page content sections."""
+        if not isinstance(landing_page_id, int):
+            raise ValueError("landing_page_id must be an integer")
+        return self.client.get_landing_page_content(landing_page_id)
+
+    def update_landing_page_content(self, landing_page_id: int, content_updates: Dict[str, str]) -> Dict[str, Any]:
+        """Update landing page editable sections."""
+        if not isinstance(landing_page_id, int):
+            raise ValueError("landing_page_id must be an integer")
+        if not content_updates or not isinstance(content_updates, dict):
+            raise ValueError("content_updates must be a non-empty dictionary")
+        return self.client.update_landing_page_content(landing_page_id, content_updates)
+
+    def approve_landing_page(self, landing_page_id: int) -> Dict[str, Any]:
+        """Approve a landing page asset."""
+        if not isinstance(landing_page_id, int):
+            raise ValueError("landing_page_id must be an integer")
+        return self.client.approve_landing_page(landing_page_id)
+
+    # Smart List Actions
+    def get_smart_list_rules(self, smart_list_id: int) -> Dict[str, Any]:
+        """Get smart list filter rules."""
+        if not isinstance(smart_list_id, int):
+            raise ValueError("smart_list_id must be an integer")
+        return self.client.get_smart_list_rules(smart_list_id)
+
+    def update_smart_list_rules(self, smart_list_id: int, rules: Dict[str, Any]) -> Dict[str, Any]:
+        """Update smart list filter criteria."""
+        if not isinstance(smart_list_id, int):
+            raise ValueError("smart_list_id must be an integer")
+        if not rules or not isinstance(rules, dict):
+            raise ValueError("rules must be a non-empty dictionary")
+        return self.client.update_smart_list_rules(smart_list_id, rules)
+
+    # Smart Campaign Actions
+    def get_smart_campaign_rules(self, campaign_id: int) -> Dict[str, Any]:
+        """Get smart campaign smart list rules."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        return self.client.get_smart_campaign_rules(campaign_id)
+
+    def update_smart_campaign_rules(self, campaign_id: int, rules: Dict[str, Any]) -> Dict[str, Any]:
+        """Update smart campaign filter criteria."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        if not rules or not isinstance(rules, dict):
+            raise ValueError("rules must be a non-empty dictionary")
+        return self.client.update_smart_campaign_rules(campaign_id, rules)
+
+    def get_smart_campaign_flow(self, campaign_id: int) -> Dict[str, Any]:
+        """Get smart campaign flow steps."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        return self.client.get_smart_campaign_flow(campaign_id)
+
+    def update_smart_campaign_flow(self, campaign_id: int, flow_steps: Dict[str, Any]) -> Dict[str, Any]:
+        """Update smart campaign flow."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        if not flow_steps or not isinstance(flow_steps, dict):
+            raise ValueError("flow_steps must be a non-empty dictionary")
+        return self.client.update_smart_campaign_flow(campaign_id, flow_steps)
+
+    def activate_smart_campaign(self, campaign_id: int) -> Dict[str, Any]:
+        """Activate a smart campaign."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        return self.client.activate_smart_campaign(campaign_id)
+
+    def schedule_smart_campaign(self, campaign_id: int, run_at: str, recipients: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Schedule a smart campaign."""
+        if not isinstance(campaign_id, int):
+            raise ValueError("campaign_id must be an integer")
+        if not run_at or not isinstance(run_at, str):
+            raise ValueError("run_at must be a non-empty string")
+        return self.client.schedule_smart_campaign(campaign_id, run_at, recipients)
 
 
 # if ADK_AVAILABLE:

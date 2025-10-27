@@ -32,7 +32,9 @@ async def test_mcp():
         # result_1 = await client.call_tool("create_smart_campaign", {"name": "creating_smart_campaign_mcp", "folder_id": 9245, "folder_type": "Folder", "description": "Create_smart_campaign_description_testing_1"})
         # print("smart campaign created result:", result_1)
 
-        result_2 = await client.call_tool("clone_program", {"program_id": 4713, "name": "Cloned_program_mcp", "folder_id": 9245, "folder_type": "Folder", "description": "Clone_program_description_testing_1"})
+        # result_2 = await client.call_tool("clone_program", {"program_id": 4713, "name": "Cloned_program_mcp_2", "folder_id": 9245, "folder_type": "Folder", "description": "Clone_program_description_testing_1"})
+        # print("Cloned program id:", result_2)
+        
         # Optional: Test trigger_campaign (side-effecting; use real data cautiously)
         # payload = {"input": [{"id": your_lead_id}]}  # Uncomment with valid payload
         # trigger_result = await client.call_tool("trigger_campaign", {
@@ -40,6 +42,14 @@ async def test_mcp():
         #     "input_payload": payload
         # })
         # print("trigger_campaign result:", trigger_result)
+        result = await client.call_tool("update_program_tokens", {
+        "program_id": 4713,
+        "tokens": {
+            "my.text.token": "Hello, this is an automated update!",
+            "my.url.token": "https://example.com/thankyou"
+            }})
+        print("Updated program tokens result:", result)
+
 
 if __name__ == "__main__":
     asyncio.run(test_mcp())
