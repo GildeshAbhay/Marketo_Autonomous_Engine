@@ -32,35 +32,26 @@ You will need to run each agent in a separate terminal window. The first time yo
 
 ### Terminal 1: Run Marketo Agent
 ```bash
-cd marketo_agent
-uv run --active .
+python -m marketo_agent.__main__
 ```
 
 ### Terminal 2: Run Web Search Agent
 ```bash
-cd websearch_agent
-uv run --active .
+python -m websearch_agent.__main__
 ```
 
-### Terminal 3: Run Host Agent
+### Terminal 3: Run Marketo MCP
 ```bash
-cd host_agent_marketo
-uv run --active adk web      
+python -m marketo_agent.mcp-server.marketo_server
 ```
-### Terminal 4: Run Marketo MCP
+
+### Terminal 4: Run Backend
 ```bash
-cd marketo_agent
-python -m mcp_servers.marketo_server
+python -m backend.app
 ```
-### Terminal 5: Run Backend
+### Terminal 5: Run Frontend
 ```bash
-cd backend
-python app.py    
-```
-### Terminal 6: Run Frontend
-```bash
-cd frontend
-python server.py    
+python -m frontend.server  
 ```
 
 ## Interact with the Host Agent
