@@ -1,5 +1,5 @@
 from sqlalchemy import select  # Add this
-from rbac import (
+from .rbac import (
     validate_user_query_permission,
     ROLE_ADMIN,
     ROLE_ANALYST
@@ -17,18 +17,18 @@ from fastapi.security import OAuth2PasswordRequestForm
 # Add parent directory to path to import host agent
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from host_agent_marketo.host.agent import HostAgent
-from models import (
+from .models import (
     QueryRequest, QueryResponse, ReportRequest, ReportTemplate, 
     ConversationHistory, UserCreate, UserResponse, Token, RefreshTokenRequest,
     AutonomousReportRequest, AutonomousReportResponse
 )
-from database import (
+from .database import (
     init_db, save_conversation, get_conversation_history, 
     User, async_session_maker, log_api_usage, APIUsage,
     get_user_usage_stats
 )
-from config import settings
-from auth import (
+from .config import settings
+from .auth import (
     get_password_hash, authenticate_user, create_access_token, 
     create_refresh_token, get_current_active_user, verify_refresh_token,
     get_user_by_username, get_user_by_email,require_analyst_or_admin,require_admin
@@ -77,21 +77,35 @@ async def startup_event():
     await init_db()
     print("✅ Database initialized")
     
-    # Initialize host agent
-    # marketo_agent_urls = [
-    #     "http://localhost:10002",  # Marketo Agent
-    #     "http://localhost:10003",  # Web Search Agent
-    # ]
-    from config import settings
-
+    # Get agent URLs
+    from .config import settings
     marketo_agent_urls = [
-        settings.marketo_agent_url,  # From deployment_config.json
-        settings.websearch_agent_url,  # From deployment_config.json
+        settings.marketo_agent_url,  # http://marketo-agent:8080 (correct for Docker!)
+        settings.websearch_agent_url,  # http://websearch-agent:8080 (correct for Docker!)
     ]
     
+    # Retry logic for connecting to agents
     print("🔄 Initializing Host Agent...")
-    host_agent_instance = await HostAgent.create(remote_agent_addresses=marketo_agent_urls)
-    print("✅ Host Agent initialized and connected to remote agents")
+    print(f"   Connecting to: {marketo_agent_urls}")
+    
+    max_retries = 15
+    retry_delay = 3  # seconds
+    
+    for attempt in range(1, max_retries + 1):
+        try:
+            host_agent_instance = await HostAgent.create(remote_agent_addresses=marketo_agent_urls)
+            print("✅ Host Agent initialized and connected to remote agents")
+            break
+        except Exception as e:
+            if attempt < max_retries:
+                print(f"⏳ Attempt {attempt}/{max_retries} failed, retrying in {retry_delay}s...")
+                print(f"   Reason: {str(e)[:100]}")
+                await asyncio.sleep(retry_delay)
+            else:
+                print(f"❌ Failed to initialize Host Agent after {max_retries} attempts")
+                print(f"   Error: {str(e)}")
+                print("   ⚠️  Backend will start but agent features will not work")
+                # Don't fail the startup - let the app run without agents
 
 # ============================================================================
 # AUTHENTICATION ENDPOINTS
@@ -569,6 +583,8 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host=settings.backend_host, port=settings.backend_port)
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", str(settings.backend_port)))
+    uvicorn.run(app, host=host, port=port)
 
 

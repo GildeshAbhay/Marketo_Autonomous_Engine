@@ -258,33 +258,63 @@ def clone_program(program_id: int, name: str, folder_id: int, folder_type: str, 
 ##--------------------------------------------------------------------------------------------------------------------------
 # Token Update Tools
 @mcp.tool()
-def get_program_tokens(program_id: int) -> dict:
+def get_tokens(folder_id: int, folder_type: str = "Folder") -> dict:
     """
-    Get My Tokens from a Marketo program.
+    Get My Tokens from a Marketo folder.
 
     Args:
-        program_id: The Marketo program ID.
+        folder_id: The Marketo folder ID.
+        folder_type: Type of folder - 'Folder' or 'Program' (default: 'Folder').
 
     Returns:
-        Dictionary containing program tokens.
+        Dictionary containing folder tokens.
     """
-    return agent.get_program_tokens(program_id)
+    return agent.get_tokens(folder_id, folder_type)
 
-@mcp.tool()
-def update_program_tokens(program_id: int, tokens: dict) -> dict:
-    """
-    Auto-populate My Tokens in a Marketo program.
+# @mcp.tool()
+# def update_program_tokens(program_id: int, tokens: dict) -> dict:
+#     """
+#     Auto-populate My Tokens in a Marketo program.
 
-    Args:
-        program_id: The Marketo program ID.
-        tokens: Dictionary mapping token names to values.
+#     Args:
+#         program_id: The Marketo program ID.
+#         tokens: Dictionary mapping token names to values.
 
-    Returns:
-        API response with updated token details.
-    """
-    return agent.update_program_tokens(program_id, tokens)
+#     Returns:
+#         API response with updated token details.
+#     """
+#     return agent.update_program_tokens(program_id, tokens)
 
 # Email Update Tools
+@mcp.tool()
+def get_email_by_name(name: str, status: str = None, folder: dict = None) -> dict:
+    """
+    Get an email asset by name from Marketo.
+
+    Args:
+        name: Name of the email to retrieve.
+        status: Optional status filter - 'approved' or 'draft'.
+        folder: Optional parent folder specification with 'id' and 'type' keys.
+
+    Returns:
+        Dictionary containing email details.
+    """
+    return agent.get_email_by_name(name, status, folder)
+
+@mcp.tool()
+def get_email_by_id(email_id: int, status: str = None) -> dict:
+    """
+    Get an email asset by ID from Marketo.
+
+    Args:
+        email_id: The Marketo email asset ID.
+        status: Optional status filter - 'approved' or 'draft'.
+
+    Returns:
+        Dictionary containing email details.
+    """
+    return agent.get_email_by_id(email_id, status)
+    
 @mcp.tool()
 def get_program_emails(program_id: int) -> dict:
     """
@@ -312,18 +342,103 @@ def get_email_content(email_id: int) -> dict:
     return agent.get_email_content(email_id)
 
 @mcp.tool()
-def update_email_content(email_id: int, content_updates: dict) -> dict:
+def update_email_content_fields(
+    email_id: int, 
+    from_email: dict = None,
+    from_name: dict = None,
+    reply_to: dict = None,
+    subject: dict = None
+) -> dict:
     """
-    Update email content variables like subject line and body.
+    Update email header fields (fromEmail, fromName, replyTo, subject).
 
     Args:
         email_id: The Marketo email asset ID.
-        content_updates: Dictionary mapping content IDs to new values.
+        from_email: Dict with 'type' and 'value' keys for from email field.
+        from_name: Dict with 'type' and 'value' keys for from name field.
+        reply_to: Dict with 'type' and 'value' keys for reply-to field.
+        subject: Dict with 'type' and 'value' keys for subject line field.
 
     Returns:
-        API response with updated email content details.
+        API response with updated email header fields.
     """
-    return agent.update_email_content(email_id, content_updates)
+    return agent.update_email_content_fields(email_id, from_email, from_name, reply_to, subject)
+
+@mcp.tool()
+def update_email_metadata(
+    email_id: int,
+    description: str = None,
+    name: str = None,
+    pre_header: str = None,
+    operational: bool = None,
+    published: bool = None,
+    text_only: bool = None,
+    web_view: bool = None
+) -> dict:
+    """
+    Update email metadata (description, name, preheader, settings).
+
+    Args:
+        email_id: The Marketo email asset ID.
+        description: Description of the asset.
+        name: Name of the email.
+        pre_header: Preheader text for the email.
+        operational: Whether email is operational (bypasses unsubscribe status).
+        published: Whether email has been published to Sales Insight.
+        text_only: Include text-only version when sent.
+        web_view: Enable 'View as Web Page' functionality.
+
+    Returns:
+        API response with updated email metadata.
+    """
+    return agent.update_email_metadata(
+        email_id, description, name, pre_header,
+        operational, published, text_only, web_view
+    )
+
+@mcp.tool()
+def update_email_content_section(
+    email_id: int,
+    html_id: str,
+    content_type: str,
+    value: str,
+    alt_text: str = None,
+    external_url: str = None,
+    height: int = None,
+    image: str = None,
+    link_url: str = None,
+    overwrite: bool = None,
+    style: str = None,
+    text_value: str = None,
+    video_url: str = None,
+    width: int = None
+) -> dict:
+    """
+    Update a specific email content section by htmlId.
+
+    Args:
+        email_id: The Marketo email asset ID.
+        html_id: The HTML ID of the content section to update.
+        content_type: Type of content - 'Text', 'DynamicContent', or 'Snippet'.
+        value: Value to set for the section.
+        alt_text: Alt text for images.
+        external_url: External URL.
+        height: Image height override.
+        image: Multipart file for image upload.
+        link_url: Link URL.
+        overwrite: Allow overwriting existing content.
+        style: CSS style parameter.
+        text_value: Text value for the section.
+        video_url: Video URL (YouTube or Vimeo only).
+        width: Image width override.
+
+    Returns:
+        API response with updated content section details.
+    """
+    return agent.update_email_content_section(email_id, html_id, content_type, value,
+        alt_text, external_url, height, image, link_url,
+        overwrite, style, text_value, video_url, width
+    )
 
 @mcp.tool()
 def approve_email(email_id: int) -> dict:
@@ -391,6 +506,173 @@ def approve_landing_page(landing_page_id: int) -> dict:
         API response confirming landing page approval.
     """
     return agent.approve_landing_page(landing_page_id)
+
+@mcp.tool()
+def update_landing_page_content_section(
+    landing_page_id: int,
+    content_id: str,
+    content_type: str,
+    background_color: str = None,
+    border_color: str = None,
+    border_style: str = None,
+    border_width: str = None,
+    height: str = None,
+    hide_desktop: bool = None,
+    hide_mobile: bool = None,
+    image_open_new_window: str = None,
+    index: int = None,
+    left: str = None,
+    link_url: str = None,
+    opacity: str = None,
+    top: str = None,
+    value: str = None,
+    width: str = None,
+    z_index: str = None
+) -> dict:
+    """
+    Update a specific landing page content section.
+
+    Args:
+        landing_page_id: The Marketo landing page asset ID.
+        content_id: ID of the landing page content section.
+        content_type: Type of content section (Image, Form, Rectangle, Snippet, RichText, HTML, DynamicContent).
+        background_color: background-color CSS property.
+        border_color: border-color CSS property.
+        border_style: border-style CSS property.
+        border_width: border-width CSS property.
+        height: height CSS property.
+        hide_desktop: Hide section on desktop browser (default false).
+        hide_mobile: Hide section on mobile browser (default false).
+        image_open_new_window: Image link behavior.
+        index: Index/order of the section in the landing page.
+        left: left CSS property.
+        link_url: URL for link type sections.
+        opacity: opacity CSS property.
+        top: top CSS property.
+        value: Content section value.
+        width: width CSS property.
+        z_index: z-index CSS property.
+
+    Returns:
+        API response with updated content section details.
+    """
+    return agent.update_landing_page_content_section(
+        landing_page_id, content_id, content_type,
+        background_color, border_color, border_style, border_width,
+        height, hide_desktop, hide_mobile, image_open_new_window,
+        index, left, link_url, opacity, top, value, width, z_index
+    )
+
+@mcp.tool()
+def update_landing_page_dynamic_content(
+    landing_page_id: int,
+    content_id: str,
+    background_color: str = None,
+    border_color: str = None,
+    border_style: str = None,
+    border_width: str = None,
+    height: str = None,
+    hide_desktop: bool = None,
+    hide_mobile: bool = None,
+    image_open_new_window: str = None,
+    left: str = None,
+    link_url: str = None,
+    opacity: str = None,
+    segment: str = None,
+    top: str = None,
+    content_type: str = None,
+    value: str = None,
+    width: str = None,
+    z_index: str = None
+) -> dict:
+    """
+    Update a landing page dynamic content section.
+
+    Args:
+        landing_page_id: The Marketo landing page asset ID.
+        content_id: ID of the landing page dynamic content.
+        background_color: background-color CSS property.
+        border_color: border-color CSS property.
+        border_style: border-style CSS property.
+        border_width: border-width CSS property.
+        height: height CSS property.
+        hide_desktop: Hide section on desktop browser (default false).
+        hide_mobile: Hide section on mobile browser (default false).
+        image_open_new_window: Image link behavior.
+        left: left CSS property.
+        link_url: URL for link type sections.
+        opacity: opacity CSS property.
+        segment: Name of the segment to display content for.
+        top: top CSS property.
+        content_type: Type of content section.
+        value: Content section value.
+        width: width CSS property.
+        z_index: z-index CSS property.
+
+    Returns:
+        API response with updated dynamic content details.
+    """
+    return agent.update_landing_page_dynamic_content(
+        landing_page_id, content_id,
+        background_color, border_color, border_style, border_width,
+        height, hide_desktop, hide_mobile, image_open_new_window,
+        left, link_url, opacity, segment, top, content_type,
+        value, width, z_index
+    )
+
+@mcp.tool()
+def add_landing_page_content_section(
+    landing_page_id: int,
+    content_id: str,
+    content_type: str,
+    background_color: str = None,
+    border_color: str = None,
+    border_style: str = None,
+    border_width: str = None,
+    height: str = None,
+    hide_desktop: bool = None,
+    hide_mobile: bool = None,
+    image_open_new_window: str = None,
+    left: str = None,
+    link_url: str = None,
+    opacity: str = None,
+    top: str = None,
+    value: str = None,
+    width: str = None,
+    z_index: str = None
+) -> dict:
+    """
+    Add a new content section to a landing page.
+
+    Args:
+        landing_page_id: The Marketo landing page asset ID.
+        content_id: ID for the new content section (also the HTML id).
+        content_type: Type of content section (Image, Form, Rectangle, Snippet, RichText, HTML).
+        background_color: background-color CSS property.
+        border_color: border-color CSS property.
+        border_style: border-style CSS property.
+        border_width: border-width CSS property.
+        height: height CSS property.
+        hide_desktop: Hide section on desktop browser (default false).
+        hide_mobile: Hide section on mobile browser (default false).
+        image_open_new_window: Image link behavior.
+        left: left CSS property.
+        link_url: URL for link type sections.
+        opacity: opacity CSS property.
+        top: top CSS property.
+        value: Content section value.
+        width: width CSS property.
+        z_index: z-index CSS property.
+
+    Returns:
+        API response with new content section details.
+    """
+    return agent.add_landing_page_content_section(
+        landing_page_id, content_id, content_type,
+        background_color, border_color, border_style, border_width,
+        height, hide_desktop, hide_mobile, image_open_new_window,
+        left, link_url, opacity, top, value, width, z_index
+    )
 
 # Smart List Tools
 @mcp.tool()
@@ -503,6 +785,36 @@ def schedule_smart_campaign(campaign_id: int, run_at: str, recipients: dict = No
     """
     return agent.schedule_smart_campaign(campaign_id, run_at, recipients)
 
+@mcp.tool()
+def schedule_campaign(
+    campaign_id: int,
+    input_data: dict = None,
+    clone_to_program_name: str = None,
+    run_at: str = None,
+    tokens: list = None
+) -> dict:
+    """
+    Schedule a batch campaign to run at a specified time.
+
+    Args:
+        campaign_id: ID of the batch campaign to schedule.
+        input_data: Schedule campaign data containing campaign-specific parameters.
+        clone_to_program_name: Name of the resulting program. When set, this will 
+            cause the campaign, parent program, and all assets to be cloned with 
+            the new name. Programs with snippets, push notifications, in-app messages, 
+            static lists, reports, and social assets may not be cloned.
+        run_at: ISO 8601 datetime string for when to run the campaign. 
+            If unset, the campaign will run 5 minutes after the call is made.
+        tokens: List of my tokens to replace during the run of the target campaign. 
+            Tokens must be available in a parent program or folder to be replaced.
+
+    Returns:
+        API response confirming campaign scheduling with schedule details.
+    """
+    return agent.schedule_campaign(
+        campaign_id, input_data, clone_to_program_name, run_at, tokens
+    )
+
 
 # ToDo: Added in Future
 # @mcp.tool()
@@ -512,6 +824,27 @@ def schedule_smart_campaign(campaign_id: int, run_at: str, recipients: dict = No
 # @mcp.tool()
 # def get_smart_list(smart_list_id: int) -> dict:
 #     return agent.get_smart_list(smart_list_id)
+
+@mcp.tool()
+def get_folder_program_contents(
+    folder_id: int,
+    folder_type: str = "Folder",
+    max_return: int = None,
+    offset: int = None
+) -> dict:
+    """
+    Get Inside contents of a Marketo folder or program.
+
+    Args:
+        folder_id: ID of the folder to retrieve.
+        folder_type: Type of folder - 'Folder' or 'Program' (default: 'Folder').
+        max_return: Maximum number of items to return (max 200, default 20).
+        offset: Integer offset for paging.
+
+    Returns:
+        Dictionary containing folder contents including assets and sub-folders.
+    """
+    return agent.get_folder_program_contents(folder_id, folder_type, max_return, offset)
 
 # ------------------------------------------------------------------------------
 # SSE transport and Starlette app (FIXED)
@@ -555,5 +888,6 @@ app = Starlette(
 if __name__ == "__main__":
     # Use uvicorn directly instead of mcp.run() for better control
     #uvicorn.run(app, host="localhost", port=8002, log_level="info")
+    host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", 8002))
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+    uvicorn.run(app, host=host, port=port, log_level="info")

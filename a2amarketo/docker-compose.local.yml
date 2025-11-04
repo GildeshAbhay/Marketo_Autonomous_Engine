@@ -1,0 +1,138 @@
+version: '3.10'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: marketo-backend:latest
+    ports:
+      - "5000:8080"
+    environment:
+      - DEPLOYMENT_ENV=local
+      - PORT=8080
+      - HOST=0.0.0.0
+      - MARKETO_AGENT_URL=http://marketo-agent:8080
+      - WEBSEARCH_AGENT_URL=http://websearch-agent:8080
+      - MCP_SERVER_URL=http://mcp-server:8080
+      - HOST_AGENT_URL=http://host-agent:8080
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - SECRET_KEY=${JWT_SECRET_KEY}
+      - MARKETO_CLIENT_ID=${MARKETO_CLIENT_ID}
+      - MARKETO_CLIENT_SECRET=${MARKETO_CLIENT_SECRET}
+      - MARKETO_IDENTITY_BASE=${MARKETO_IDENTITY_BASE}
+      - MARKETO_REST_BASE=${MARKETO_REST_BASE}
+    depends_on:
+      - marketo-agent
+      - websearch-agent
+      - mcp-server
+      # - host-agent
+    networks:
+      - marketo-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    image: marketo-frontend:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - DEPLOYMENT_ENV=local
+      - PORT=8080
+      - BACKEND_URL=http://backend:8080
+    depends_on:
+      - backend
+    networks:
+      - marketo-network
+    restart: unless-stopped
+
+  marketo-agent:
+    build:
+      context: .
+      dockerfile: marketo_agent/Dockerfile
+    image: marketo-agent:latest
+    ports:
+      - "10002:8080"
+    environment:
+      - DEPLOYMENT_ENV=local
+      - PORT=8080
+      - HOST=0.0.0.0
+      - MCP_SERVER_URL=http://mcp-server:8080 
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - MARKETO_CLIENT_ID=${MARKETO_CLIENT_ID}
+      - MARKETO_CLIENT_SECRET=${MARKETO_CLIENT_SECRET}
+      - MARKETO_IDENTITY_BASE=${MARKETO_IDENTITY_BASE}
+      - MARKETO_REST_BASE=${MARKETO_REST_BASE}
+    networks:
+      - marketo-network
+    restart: unless-stopped
+
+  websearch-agent:
+    build:
+      context: .
+      dockerfile: websearch_agent/Dockerfile
+    image: websearch-agent:latest
+    ports:
+      - "10003:8080"
+    environment:
+      - DEPLOYMENT_ENV=local
+      - PORT=8080
+      - HOST=0.0.0.0
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    networks:
+      - marketo-network
+    restart: unless-stopped
+
+  mcp-server:
+    build:
+      context: .
+      dockerfile: marketo_agent/mcp-servers/Dockerfile
+    image: marketo-mcp-server:latest
+    ports:
+      - "8002:8080"
+    environment:
+      - DEPLOYMENT_ENV=local
+      - PORT=8080
+      - HOST=0.0.0.0 
+      - MARKETO_AGENT_URL=http://marketo-agent:8080
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - MARKETO_CLIENT_ID=${MARKETO_CLIENT_ID}
+      - MARKETO_CLIENT_SECRET=${MARKETO_CLIENT_SECRET}
+      - MARKETO_IDENTITY_BASE=${MARKETO_IDENTITY_BASE}
+      - MARKETO_REST_BASE=${MARKETO_REST_BASE}
+    networks:
+      - marketo-network
+    restart: unless-stopped
+
+  # host-agent:
+  #   build:
+  #     context: .
+  #     dockerfile: host_agent_marketo/Dockerfile
+  #   image: marketo-host-agent:latest
+  #   ports:
+  #     - "10001:8080"
+  #   environment:
+  #     - DEPLOYMENT_ENV=local
+  #     - PORT=8080
+  #     - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+  #     - MARKETO_CLIENT_ID=${MARKETO_CLIENT_ID}
+  #     - MARKETO_CLIENT_SECRET=${MARKETO_CLIENT_SECRET}
+  #     - MARKETO_IDENTITY_BASE=${MARKETO_IDENTITY_BASE}
+  #     - MARKETO_REST_BASE=${MARKETO_REST_BASE}
+  #     - MARKETO_AGENT_URL=http://marketo-agent:8080
+  #     - WEBSEARCH_AGENT_URL=http://websearch-agent:8080
+  #     - MCP_SERVER_URL=http://mcp-server:8080
+  #   depends_on:
+  #     - marketo-agent
+  #     - websearch-agent
+  #     - mcp-server
+  #   networks:
+  #     - marketo-network
+  #   restart: unless-stopped
+
+networks:
+  marketo-network:
+    driver: bridge
+

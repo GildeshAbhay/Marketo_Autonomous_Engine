@@ -10,8 +10,8 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from config import settings
-from database import async_session_maker, User
+from .config import settings
+from .database import async_session_maker, User
 
 # Password hashing using Argon2 (modern, secure, no byte limitations)
 # Argon2 is recommended by OWASP and won the Password Hashing Competition

@@ -1,0 +1,60 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+*/venv/
+*/.venv/
+
+# UV lock files (we install from requirements.txt)
+uv.lock
+*/uv.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Database files (should be mounted as volume, not copied)
+*.db
+conversations.db
+
+# Logs
+*.log
+
+# OS files
+Thumbs.db
+
+# Test files
+test_*.py
+*_test.py
+tests/
+mcp-test.py
+mcp-function-test.py
+
+# Documentation
+*.md
+!README.md
+
+# Deployment artifacts
+deploy.sh
+setup-secrets,sh
+deployment_config_deploy.json
+
+# Google Cloud credentials (should be mounted as secret)
+*.json
+!deployment_config.json
+

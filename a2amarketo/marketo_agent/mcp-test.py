@@ -42,12 +42,20 @@ async def test_mcp():
         #     "input_payload": payload
         # })
         # print("trigger_campaign result:", trigger_result)
-        result = await client.call_tool("update_program_tokens", {
-        "program_id": 4713,
-        "tokens": {
-            "my.text.token": "Hello, this is an automated update!",
-            "my.url.token": "https://example.com/thankyou"
+        # result = await client.call_tool("update_program_tokens", {
+        # "program_id": 4713,
+        # "tokens": {
+        #     "my.text.token": "Hello, this is an automated update!",
+        #     "my.url.token": "https://example.com/thankyou"
+        #     }})
+
+        result= await client.call_tool("update_email_content_fields", {
+            "email_id": 12139,
+            "from_email": {
+                "type": "Text",
+                "value": "saksham_dubey@grazitti.com"
             }})
+
         print("Updated program tokens result:", result)
 
 

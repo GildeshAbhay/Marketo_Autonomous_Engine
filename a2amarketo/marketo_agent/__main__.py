@@ -15,8 +15,8 @@ from a2a.types import (
     AgentCard,
     AgentSkill,
 )
-from agent import create_agent
-from agent_executor import MarketoAgentExecutor
+from .agent import create_agent
+from .agent_executor import MarketoAgentExecutor
 from dotenv import load_dotenv
 from google.adk.artifacts import InMemoryArtifactService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
@@ -39,7 +39,9 @@ def main():
     # port = 10002
 
     service_name = "marketo_agent"  # or "websearch_agent"
-    host = deployment_config.get_service_host(service_name)
+    # host = deployment_config.get_service_host(service_name)
+    # port = deployment_config.get_service_port(service_name)
+    host = os.getenv("HOST", "0.0.0.0")
     port = deployment_config.get_service_port(service_name)
 
     try:

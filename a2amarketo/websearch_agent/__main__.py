@@ -10,8 +10,8 @@ from a2a.types import (
     AgentCard,
     AgentSkill,
 )
-from agent import create_agent
-from agent_executor import WebSearchAgentExecutor
+from .agent import create_agent
+from .agent_executor import WebSearchAgentExecutor
 from dotenv import load_dotenv
 from google.adk.artifacts import InMemoryArtifactService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
@@ -32,8 +32,9 @@ class MissingAPIKeyError(Exception):
 
 def main():
     """Starts the agent server."""
-    host = "localhost"
-    port = 10003
+    # Docker needs 0.0.0.0 to be accessible from other containers
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", "8080"))
     try:
         # Check for API key only if Vertex AI is not configured
         if not os.getenv("GOOGLE_GENAI_USE_VERTEXAI") == "TRUE":

@@ -38,6 +38,12 @@ class DeploymentConfig:
     
     def get_service_url(self, service_name: str) -> str:
         """Get URL for a service."""
+        # Check if there's an environment variable override (for Docker)
+        import os
+        env_var_name = f"{service_name.upper()}_URL"
+        env_url = os.getenv(env_var_name)
+        if env_url:
+            return env_url
         return self.config[service_name]["url"]
     
     def get_service_host(self, service_name: str) -> str:

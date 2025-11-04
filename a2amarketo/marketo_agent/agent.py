@@ -5,7 +5,7 @@ from google.adk.agents import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import SseServerParams
 from google.adk.agents import LlmAgent
-from utils.marketo_client import MarketoClient
+from .utils.marketo_client import MarketoClient
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from shared.config_loader import get_config

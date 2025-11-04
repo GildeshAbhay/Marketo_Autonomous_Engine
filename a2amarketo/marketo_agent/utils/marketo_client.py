@@ -328,40 +328,88 @@ class MarketoClient:
             data["description"] = description
         return self._request_form("POST", path, data=data)
 
-    # Token Update Functions
-    def get_program_tokens(self, program_id: int) -> Dict[str, Any]:
-        """Get My Tokens from a program.
-        Endpoint: GET /rest/asset/v1/program/{id}/tokens.json
+    # ToDo: Added in Future needs to be updated as it is for program but in actual it is for folder    
+    def get_tokens(self, folder_id: int, folder_type: str = "Folder") -> Dict[str, Any]:
+        """Get My Tokens from a folder.
+        Endpoint: GET /rest/asset/v1/folder/{id}/tokens.json
         
         Args:
-            program_id: The Marketo program ID
+            folder_id: The Marketo folder ID
+            folder_type: Type of folder - 'Folder' or 'Program' (default: 'Folder')
         
         Returns:
-            Dictionary containing program tokens
+            Dictionary containing folder tokens
         """
-        path = f"/rest/asset/v1/program/{program_id}/tokens.json"
-        return self._request("GET", path)
+        path = f"/rest/asset/v1/folder/{folder_id}/tokens.json"
+        params = {"folderType": folder_type}
+        return self._request("GET", path, params=params)
 
-    def update_program_tokens(self, program_id: int, tokens: Dict[str, str]) -> Dict[str, Any]:
-        """Auto-populate My Tokens in a program.
-        Endpoint: POST /rest/asset/v1/program/{id}/tokens.json
+    # def update_program_tokens(self, program_id: int, tokens: Dict[str, str]) -> Dict[str, Any]:
+    #     """Auto-populate My Tokens in a program.
+    #     Endpoint: POST /rest/asset/v1/program/{id}/tokens.json
         
-        Args:
-            program_id: The Marketo program ID
-            tokens: Dictionary mapping token names to values
+    #     Args:
+    #         program_id: The Marketo program ID
+    #         tokens: Dictionary mapping token names to values
         
-        Returns:
-            API response with updated token details
-        """
-        path = f"/rest/asset/v1/program/{program_id}/tokens.json"
-        data = {}
-        for token_name, value in tokens.items():
-            data[f"tokens[{token_name}]"] = value
-        return self._request_form("POST", path, data=data)
+    #     Returns:
+    #         API response with updated token details
+    #     """
+    #     path = f"/rest/asset/v1/program/{program_id}/tokens.json"
+    #     data = {}
+    #     for token_name, value in tokens.items():
+    #         data[f"tokens[{token_name}]"] = value
+    #     return self._request_form("POST", path, data=data)
 
 ##--------------------------------------------------------------------------------------------------------------
 
     # Email Updates Functions
+    def get_email_by_name(
+        self, 
+        name: str, 
+        status: Optional[str] = None,
+        folder: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """Get an email by name.
+        Endpoint: GET /rest/asset/v1/email/byName.json
+        
+        Args:
+            name: Name of the email
+            status: Optional status filter ('approved' or 'draft')
+            folder: Optional JSON representation of parent folder with 'id' and 'type'
+        
+        Returns:
+            Dictionary containing email details
+        """
+        path = "/rest/asset/v1/email/byName.json"
+        params = {"name": name}
+        if status:
+            if status not in ["approved", "draft"]:
+                raise ValueError("status must be 'approved' or 'draft'")
+            params["status"] = status
+        if folder:
+            params["folder"] = json.dumps(folder)
+        return self._request("GET", path, params=params)
+
+    def get_email_by_id(self, email_id: int, status: Optional[str] = None) -> Dict[str, Any]:
+        """Get an email by ID.
+        Endpoint: GET /rest/asset/v1/email/{id}.json
+        
+        Args:
+            email_id: The Marketo email asset ID
+            status: Optional status filter ('approved' or 'draft')
+        
+        Returns:
+            Dictionary containing email details
+        """
+        path = f"/rest/asset/v1/email/{email_id}.json"
+        params = {}
+        if status:
+            if status not in ["approved", "draft"]:
+                raise ValueError("status must be 'approved' or 'draft'")
+            params["status"] = status
+        return self._request("GET", path, params=params if params else None)
+        
     def get_program_emails(self, program_id: int) -> Dict[str, Any]:
         """Get all email assets from a program.
         Endpoint: GET /rest/asset/v1/program/{id}/emails.json
@@ -417,6 +465,162 @@ class MarketoClient:
         """
         path = f"/rest/asset/v1/email/{email_id}/approveDraft.json"
         return self._request_form("POST", path)
+
+    def update_email_content_fields(
+        self, 
+        email_id: int, 
+        from_email: Optional[Dict[str, str]] = None,
+        from_name: Optional[Dict[str, str]] = None,
+        reply_to: Optional[Dict[str, str]] = None,
+        subject: Optional[Dict[str, str]] = None
+    ) -> Dict[str, Any]:
+        """Update email header fields (fromEmail, fromName, replyTo, subject).
+        Endpoint: POST /rest/asset/v1/email/{id}/content.json
+        
+        Args:
+            email_id: The Marketo email asset ID
+            from_email: Dict with 'type' and 'value' keys for from email
+            from_name: Dict with 'type' and 'value' keys for from name
+            reply_to: Dict with 'type' and 'value' keys for reply-to
+            subject: Dict with 'type' and 'value' keys for subject line
+        
+        Returns:
+            API response with updated email header fields
+        """
+        path = f"/rest/asset/v1/email/{email_id}/content.json"
+        data = {}
+        
+        if from_email:
+            data["fromEmail"] = json.dumps(from_email)
+        if from_name:
+            data["fromName"] = json.dumps(from_name)
+        if reply_to:
+            data["replyTO"] = json.dumps(reply_to)
+        if subject:
+            data["subject"] = json.dumps(subject)
+        
+        if not data:
+            raise ValueError("At least one header field must be provided")
+        
+        return self._request_form("POST", path, data=data)
+
+    def update_email_metadata(
+        self, 
+        email_id: int,
+        description: Optional[str] = None,
+        name: Optional[str] = None,
+        pre_header: Optional[str] = None,
+        operational: Optional[bool] = None,
+        published: Optional[bool] = None,
+        text_only: Optional[bool] = None,
+        web_view: Optional[bool] = None
+    ) -> Dict[str, Any]:
+        """Update email metadata (description, name, preheader, etc.).
+        Endpoint: POST /rest/asset/v1/email/{id}.json
+        
+        Args:
+            email_id: The Marketo email asset ID
+            description: Description of the asset
+            name: Name of the email
+            pre_header: Preheader text for the email
+            operational: Whether the email is operational (bypasses unsubscribe)
+            published: Whether the email has been published to Sales Insight
+            text_only: Include text-only version when sent
+            web_view: Enable 'View as Web Page'
+        
+        Returns:
+            API response with updated email metadata
+        """
+        path = f"/rest/asset/v1/email/{email_id}.json"
+        data = {}
+        
+        if description is not None:
+            data["description"] = description
+        if name is not None:
+            data["name"] = name
+        if pre_header is not None:
+            data["preHeader"] = pre_header
+        if operational is not None:
+            data["operational"] = str(operational).lower()
+        if published is not None:
+            data["published"] = str(published).lower()
+        if text_only is not None:
+            data["textOnly"] = str(text_only).lower()
+        if web_view is not None:
+            data["webView"] = str(web_view).lower()
+        
+        if not data:
+            raise ValueError("At least one metadata field must be provided")
+        
+        return self._request_form("POST", path, data=data)
+
+    def update_email_content_section(
+        self, 
+        email_id: int,
+        html_id: str,
+        content_type: str,
+        value: str,
+        alt_text: Optional[str] = None,
+        external_url: Optional[str] = None,
+        height: Optional[int] = None,
+        image: Optional[str] = None,
+        link_url: Optional[str] = None,
+        overwrite: Optional[bool] = None,
+        style: Optional[str] = None,
+        text_value: Optional[str] = None,
+        video_url: Optional[str] = None,
+        width: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Update a specific email content section by htmlId.
+        Endpoint: POST /rest/asset/v1/email/{id}/content/{htmlId}.json
+        
+        Args:
+            email_id: The Marketo email asset ID
+            html_id: The HTML ID of the content section
+            content_type: Type of content ('Text', 'DynamicContent', or 'Snippet')
+            value: Value to set for the section
+            alt_text: Alt text for images
+            external_url: External URL
+            height: Image height override
+            image: Multipart file for image upload
+            link_url: Link URL
+            overwrite: Allow overwriting existing content
+            style: CSS style parameter
+            text_value: Text value for the section
+            video_url: Video URL (YouTube or Vimeo)
+            width: Image width override
+        
+        Returns:
+            API response with updated content section details
+        """
+        path = f"/rest/asset/v1/email/{email_id}/content/{html_id}.json"
+        data = {
+            "type": content_type,
+            "value": value
+        }
+        
+        if alt_text is not None:
+            data["altText"] = alt_text
+        if external_url is not None:
+            data["externalUrl"] = external_url
+        if height is not None:
+            data["height"] = str(height)
+        if image is not None:
+            data["image"] = image
+        if link_url is not None:
+            data["linkUrl"] = link_url
+        if overwrite is not None:
+            data["overWrite"] = str(overwrite).lower()
+        if style is not None:
+            data["style"] = style
+        if text_value is not None:
+            data["textValue"] = text_value
+        if video_url is not None:
+            data["videoUrl"] = video_url
+        if width is not None:
+            data["width"] = str(width)
+        
+        return self._request_form("POST", path, data=data)
 
     # Landing Page Updates Functions
     def get_program_landing_pages(self, program_id: int) -> Dict[str, Any]:
@@ -474,6 +678,268 @@ class MarketoClient:
         """
         path = f"/rest/asset/v1/landingPage/{landing_page_id}/approveDraft.json"
         return self._request_form("POST", path)
+
+    def update_landing_page_content_section(
+        self,
+        landing_page_id: int,
+        content_id: str,
+        content_type: str,
+        background_color: Optional[str] = None,
+        border_color: Optional[str] = None,
+        border_style: Optional[str] = None,
+        border_width: Optional[str] = None,
+        height: Optional[str] = None,
+        hide_desktop: Optional[bool] = None,
+        hide_mobile: Optional[bool] = None,
+        image_open_new_window: Optional[str] = None,
+        index: Optional[int] = None,
+        left: Optional[str] = None,
+        link_url: Optional[str] = None,
+        opacity: Optional[str] = None,
+        top: Optional[str] = None,
+        value: Optional[str] = None,
+        width: Optional[str] = None,
+        z_index: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Update a specific landing page content section.
+        Endpoint: POST /rest/asset/v1/landingPage/{id}/content/{contentId}.json
+        
+        Args:
+            landing_page_id: The Marketo landing page asset ID
+            content_id: ID of the landing page content section
+            content_type: Type of content section (Image, Form, Rectangle, Snippet, RichText, HTML, DynamicContent)
+            background_color: background-color CSS property
+            border_color: border-color CSS property
+            border_style: border-style CSS property
+            border_width: border-width CSS property
+            height: height CSS property
+            hide_desktop: Hide on desktop browser (default false)
+            hide_mobile: Hide on mobile browser (default false)
+            image_open_new_window: Image link behavior
+            index: Index/order of the section in the landing page
+            left: left CSS property
+            link_url: URL for link type sections
+            opacity: opacity CSS property
+            top: top CSS property
+            value: Content section value
+            width: width CSS property
+            z_index: z-index CSS property
+        
+        Returns:
+            API response with updated content section details
+        """
+        path = f"/rest/asset/v1/landingPage/{landing_page_id}/content/{content_id}.json"
+        data = {"type": content_type}
+        
+        if background_color is not None:
+            data["backgroundColor"] = background_color
+        if border_color is not None:
+            data["borderColor"] = border_color
+        if border_style is not None:
+            data["borderStyle"] = border_style
+        if border_width is not None:
+            data["borderWidth"] = border_width
+        if height is not None:
+            data["height"] = height
+        if hide_desktop is not None:
+            data["hideDesktop"] = str(hide_desktop).lower()
+        if hide_mobile is not None:
+            data["hideMobile"] = str(hide_mobile).lower()
+        if image_open_new_window is not None:
+            data["imageOpenNewWindow"] = image_open_new_window
+        if index is not None:
+            data["index"] = str(index)
+        if left is not None:
+            data["left"] = left
+        if link_url is not None:
+            data["linkUrl"] = link_url
+        if opacity is not None:
+            data["opacity"] = opacity
+        if top is not None:
+            data["top"] = top
+        if value is not None:
+            data["value"] = value
+        if width is not None:
+            data["width"] = width
+        if z_index is not None:
+            data["zIndex"] = z_index
+        
+        return self._request_form("POST", path, data=data)
+
+    def update_landing_page_dynamic_content(
+        self,
+        landing_page_id: int,
+        content_id: str,
+        background_color: Optional[str] = None,
+        border_color: Optional[str] = None,
+        border_style: Optional[str] = None,
+        border_width: Optional[str] = None,
+        height: Optional[str] = None,
+        hide_desktop: Optional[bool] = None,
+        hide_mobile: Optional[bool] = None,
+        image_open_new_window: Optional[str] = None,
+        left: Optional[str] = None,
+        link_url: Optional[str] = None,
+        opacity: Optional[str] = None,
+        segment: Optional[str] = None,
+        top: Optional[str] = None,
+        content_type: Optional[str] = None,
+        value: Optional[str] = None,
+        width: Optional[str] = None,
+        z_index: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Update a landing page dynamic content section.
+        Endpoint: POST /rest/asset/v1/landingPage/{id}/dynamicContent/{contentId}.json
+        
+        Args:
+            landing_page_id: The Marketo landing page asset ID
+            content_id: ID of the landing page dynamic content
+            background_color: background-color CSS property
+            border_color: border-color CSS property
+            border_style: border-style CSS property
+            border_width: border-width CSS property
+            height: height CSS property
+            hide_desktop: Hide on desktop browser (default false)
+            hide_mobile: Hide on mobile browser (default false)
+            image_open_new_window: Image link behavior
+            left: left CSS property
+            link_url: URL for link type sections
+            opacity: opacity CSS property
+            segment: Name of the segment to display content for
+            top: top CSS property
+            content_type: Type of content section
+            value: Content section value
+            width: width CSS property
+            z_index: z-index CSS property
+        
+        Returns:
+            API response with updated dynamic content details
+        """
+        path = f"/rest/asset/v1/landingPage/{landing_page_id}/dynamicContent/{content_id}.json"
+        data = {}
+        
+        if background_color is not None:
+            data["backgroundColor"] = background_color
+        if border_color is not None:
+            data["borderColor"] = border_color
+        if border_style is not None:
+            data["borderStyle"] = border_style
+        if border_width is not None:
+            data["borderWidth"] = border_width
+        if height is not None:
+            data["height"] = height
+        if hide_desktop is not None:
+            data["hideDesktop"] = str(hide_desktop).lower()
+        if hide_mobile is not None:
+            data["hideMobile"] = str(hide_mobile).lower()
+        if image_open_new_window is not None:
+            data["imageOpenNewWindow"] = image_open_new_window
+        if left is not None:
+            data["left"] = left
+        if link_url is not None:
+            data["linkUrl"] = link_url
+        if opacity is not None:
+            data["opacity"] = opacity
+        if segment is not None:
+            data["segment"] = segment
+        if top is not None:
+            data["top"] = top
+        if content_type is not None:
+            data["type"] = content_type
+        if value is not None:
+            data["value"] = value
+        if width is not None:
+            data["width"] = width
+        if z_index is not None:
+            data["zIndex"] = z_index
+        
+        return self._request_form("POST", path, data=data)
+
+    def add_landing_page_content_section(
+        self,
+        landing_page_id: int,
+        content_id: str,
+        content_type: str,
+        background_color: Optional[str] = None,
+        border_color: Optional[str] = None,
+        border_style: Optional[str] = None,
+        border_width: Optional[str] = None,
+        height: Optional[str] = None,
+        hide_desktop: Optional[bool] = None,
+        hide_mobile: Optional[bool] = None,
+        image_open_new_window: Optional[str] = None,
+        left: Optional[str] = None,
+        link_url: Optional[str] = None,
+        opacity: Optional[str] = None,
+        top: Optional[str] = None,
+        value: Optional[str] = None,
+        width: Optional[str] = None,
+        z_index: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Add a new content section to a landing page.
+        Endpoint: POST /rest/asset/v1/landingPage/{id}/content.json
+        
+        Args:
+            landing_page_id: The Marketo landing page asset ID
+            content_id: ID for the new content section (also the HTML id)
+            content_type: Type of content section (Image, Form, Rectangle, Snippet, RichText, HTML)
+            background_color: background-color CSS property
+            border_color: border-color CSS property
+            border_style: border-style CSS property
+            border_width: border-width CSS property
+            height: height CSS property
+            hide_desktop: Hide on desktop browser (default false)
+            hide_mobile: Hide on mobile browser (default false)
+            image_open_new_window: Image link behavior
+            left: left CSS property
+            link_url: URL for link type sections
+            opacity: opacity CSS property
+            top: top CSS property
+            value: Content section value
+            width: width CSS property
+            z_index: z-index CSS property
+        
+        Returns:
+            API response with new content section details
+        """
+        path = f"/rest/asset/v1/landingPage/{landing_page_id}/content.json"
+        data = {
+            "contentId": content_id,
+            "type": content_type
+        }
+        
+        if background_color is not None:
+            data["backgroundColor"] = background_color
+        if border_color is not None:
+            data["borderColor"] = border_color
+        if border_style is not None:
+            data["borderStyle"] = border_style
+        if border_width is not None:
+            data["borderWidth"] = border_width
+        if height is not None:
+            data["height"] = height
+        if hide_desktop is not None:
+            data["hideDesktop"] = str(hide_desktop).lower()
+        if hide_mobile is not None:
+            data["hideMobile"] = str(hide_mobile).lower()
+        if image_open_new_window is not None:
+            data["imageOpenNewWindow"] = image_open_new_window
+        if left is not None:
+            data["left"] = left
+        if link_url is not None:
+            data["linkUrl"] = link_url
+        if opacity is not None:
+            data["opacity"] = opacity
+        if top is not None:
+            data["top"] = top
+        if value is not None:
+            data["value"] = value
+        if width is not None:
+            data["width"] = width
+        if z_index is not None:
+            data["zIndex"] = z_index
+        
+        return self._request_form("POST", path, data=data)
 
     # Smart Lists Functions
     def get_smart_list_rules(self, smart_list_id: int) -> Dict[str, Any]:
@@ -588,5 +1054,75 @@ class MarketoClient:
         if recipients:
             data.update(recipients)
         return self._request_form("POST", path, data=data)
+
+    def schedule_campaign(
+        self,
+        campaign_id: int,
+        input_data: Optional[Dict[str, Any]] = None,
+        clone_to_program_name: Optional[str] = None,
+        run_at: Optional[str] = None,
+        tokens: Optional[list[Dict[str, Any]]] = None
+    ) -> Dict[str, Any]:
+        """Schedule a batch campaign to run.
+        Endpoint: POST /rest/v1/campaigns/{campaignId}/schedule.json
+        
+        Args:
+            campaign_id: ID of the batch campaign to schedule
+            input_data: Schedule campaign data (input object)
+            clone_to_program_name: Name for the resulting cloned program. When set, 
+                this will cause the campaign, parent program, and all assets to be 
+                cloned with the new name
+            run_at: ISO 8601 datetime string for when to run the campaign. 
+                If unset, campaign runs 5 minutes after the call
+            tokens: List of my tokens to replace during the campaign run. 
+                Tokens must be available in a parent program or folder
+        
+        Returns:
+            API response confirming campaign scheduling
+        """
+        path = f"/rest/v1/campaigns/{campaign_id}/schedule.json"
+        payload = {}
+        
+        if input_data is not None:
+            payload["input"] = input_data
+        if clone_to_program_name is not None:
+            payload["cloneToProgramName"] = clone_to_program_name
+        if run_at is not None:
+            payload["runAt"] = run_at
+        if tokens is not None:
+            payload["tokens"] = tokens
+        
+        return self._request("POST", path, json=payload)
+
+    def get_folder_program_contents(
+        self,
+        folder_id: int,
+        folder_type: str = "Folder",
+        max_return: Optional[int] = None,
+        offset: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Get contents of a Marketo folder or program.
+        Endpoint: GET /rest/asset/v1/folder/{id}/content.json
+        
+        Args:
+            folder_id: ID of the folder to retrieve
+            folder_type: Type of folder - 'Folder' or 'Program' (default: 'Folder')
+            max_return: Maximum number of items to return (max 200, default 20)
+            offset: Integer offset for paging
+        
+        Returns:
+            Dictionary containing folder contents
+        """
+        path = f"/rest/asset/v1/folder/{folder_id}/content.json"
+        params = {"type": folder_type}
+        
+        if max_return is not None:
+            if max_return > 200:
+                raise ValueError("max_return cannot exceed 200")
+            params["maxReturn"] = max_return
+        if offset is not None:
+            params["offset"] = offset
+        
+        return self._request("GET", path, params=params)
 
 

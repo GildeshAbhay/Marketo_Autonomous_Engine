@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "ma-engine-saksham-dubey",
+  "private_key_id": "d3adc868aabce141bfd5aff670857c5430d5e808",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDRs3xUFtymmHa5\ntXVwPHYf2BKAZMzC9azhoQik4WCHF9CqPU7e7d7Ciw/y3eLCNef7pGfSSn7rY/Ov\nJFG/8VkiY8H3vkwvmN6Zhf/Gx1waJtfapclklfj2Wxpak3GnwLsLEz0hsTz1/PXc\nTeqPnbsrWcQzv+WoPe7FFmll7LJC++dyXy3GIXSclBWmje/KhAqXbNPn9RnG0dBd\nRT7vH4RfE97NlL6cQkAUF9daxeBwDzIua5Qs/g8YT0dUAA0FjpAY/6lBsd83xWnm\nxXkc0a63YXcdq7hXaBW5QWCkRrpMzWfTUVKYT9mongKzNemYTyn+56w8rWf4XCuP\nOatLyA/3AgMBAAECggEAF/HXZ9VXIKwWx8x75R2iR1npfZZaTdthAD/eYtAGsPum\ngf86JaPNDzMd1mzrsE1uIy0ksGh9PEJPgwIyANQoNLsQsknycm+Ri2o3nepfDpq8\n2bnwgyHKKdHr8nJqRJjHQtPRjn//JqovJha83+VHiAMEr6a2gegrKX9jousiIm+4\nQHpGkpatnnbFmVy1ixuMH4Qns4App91550qNQlE4ODVUqZsBu8UY6snffhe+5kIE\nO6b/OREo6TesX7X2mc2nmM0EqEW4CW2qkiPgYr5Y4NgFVt5CIkcenddJk5C7VQ1I\nFuDczfu+KbMKipUn5tTGE/P27UcwoSu4ZKtOriAEMQKBgQDpFoUFuhWSpXmHegXL\npo4XV5363WbLsjcbKne2jSnSH+3fe91SF/s7H9OiOtEgW+LOUkV3D7L4s0PUTYly\n/agpCFvsUW2ARzs8EtGbN0EqgEe0lUP2HVDoXvdFm1BmthxJs9gprYqMuOK+V4Wv\nXquWzgQTLW0ddE/sH824uJr3mwKBgQDmUHQtN6HH7VRMcRl//Mm1qKlbu5UhT5aQ\novieIgR6qiXagC8iNdF/hM7h85+9hj3dnGizZ8PwP/EZavV2TS02sz/03GPVOBfU\nHWVsgXc26C7fSKz20pNlGphOKQRpsf4kEeTQ7KrueCPZItfBw1e8ZlhtTCmf9Vws\n/pYvJRbk1QKBgQCpMLqADLHqD4kmiLE6QPy0/tlipmEejI8pfesFrHPl3V1aMlvV\nYijvosuI3667EVeRsfBQWynrEpyyt1GFEZCFsFahM/4K9imOEo7pXvNDeXgTIaIC\nPQdklMJiWTnERH5GFXBb2GdQfEfCKF+Wi158CbC1huzES5BT8kXuxrld7wKBgGNe\niwGHYzHTX++rTIlAE/dg0dFWWb2JjTjSV9pCaxRRnQttCukDt2QBdRFf/6fR55da\nCIJ/Xraln+yLjWSBX+Sd6hZHkHtKPF20YTIzmbAC9VY5EQddS2Lv2o6+e7zuouwF\nHGhX9Ff3VeA1fEmJcq1CqxxdJAhz4FU5cqrcocgRAoGAIiMN7gRznbfnLFgSRkrE\nx5elfMEYu7/Ni8RjVCEokrFPGmUlFIYBewNnkWlyoGbVbernFSfuFaUMeW063QUm\nxkXFolqb2tnLiAk25+MVlxY63APa/ahYERXNVBBUSTPxiSI/PICFt7ZOI6z7YOGK\ndnBl5uoaAzV6H05Jx3RfjU4=\n-----END PRIVATE KEY-----\n",
+  "client_email": "maengine@ma-engine-saksham-dubey.iam.gserviceaccount.com",
+  "client_id": "110516267656498826973",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/maengine%40ma-engine-saksham-dubey.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

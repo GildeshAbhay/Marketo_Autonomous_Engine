@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
 import os
 import sys
@@ -10,6 +10,11 @@ from shared.config_loader import get_config
 deployment_config = get_config()
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore"  # Ignore extra environment variables
+    )
+    
     # Backend settings - now from deployment_config.json
     backend_host: str = deployment_config.get_service_host("backend")
     backend_port: int = deployment_config.get_service_port("backend")
@@ -34,8 +39,5 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
-    
-    class Config:
-        env_file = ".env"
 
 settings = Settings()

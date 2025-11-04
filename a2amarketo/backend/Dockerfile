@@ -2,22 +2,30 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Copy shared config first
-COPY ../shared /app/shared
+# Copy deployment config (needed by shared/config_loader.py)
+COPY deployment_config.json /app/deployment_config.json
 
-# Copy backend requirements and install
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy shared config
+COPY shared /app/shared
+
+# Copy host_agent_marketo (needed by backend)
+COPY host_agent_marketo /app/host_agent_marketo
+
+# Copy requirements.txt from root level FIRST
+COPY requirements.txt /app/requirements.txt
+
+# Install all dependencies
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy backend code
-COPY . .
+COPY backend /app/backend
 
 # Expose port (Cloud Run sets PORT env var)
 EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD python -c "import requests; requests.get('http://localhost:8080/api/health')"
+  CMD python -c "import requests; requests.get('http://localhost:${PORT:-8080}/api/health')"
 
-# Run the app with proper host binding
-CMD exec uvicorn app:app --host 0.0.0.0 --port ${PORT:-8080} --workers 1
+# Run the app using module syntax from /app directory
+CMD ["python", "-m", "backend.app"]

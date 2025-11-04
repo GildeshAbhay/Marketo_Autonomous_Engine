@@ -1,0 +1,18 @@
+# Docker Configuration
+DOCKER_USERNAME=your-dockerhub-username
+
+# API Keys
+GOOGLE_API_KEY=your-google-api-key
+
+# JWT Configuration
+JWT_SECRET_KEY=your-secret-key-here
+
+# Marketo API Configuration
+MARKETO_CLIENT_ID=your-marketo-client-id
+MARKETO_CLIENT_SECRET=your-marketo-client-secret
+MARKETO_IDENTITY_BASE=https://your-instance.mktorest.com/identity
+MARKETO_REST_BASE=https://your-instance.mktorest.com/rest
+
+# Deployment Environment
+DEPLOYMENT_ENV=local
+
