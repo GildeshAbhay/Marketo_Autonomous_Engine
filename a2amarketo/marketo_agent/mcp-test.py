@@ -49,14 +49,25 @@ async def test_mcp():
         #     "my.url.token": "https://example.com/thankyou"
         #     }})
 
-        result= await client.call_tool("update_email_content_fields", {
-            "email_id": 12139,
-            "from_email": {
-                "type": "Text",
-                "value": "saksham_dubey@grazitti.com"
-            }})
+        # result= await client.call_tool("update_email_content_fields", {
+        #     "email_id": 12139,
+        #     "from_email": {
+        #         "type": "Text",
+        #         "value": "saksham_dubey@grazitti.com"
+        #     }})
 
-        print("Updated program tokens result:", result)
+        # print("Updated program tokens result:", result)
+
+        fields_result = await client.call_tool("describe_lead", {})
+        print("Lead fields:", fields_result)
+        
+        # Test bulk import leads with minimal fields
+        result = await client.call_tool("bulk_import_leads", {
+            "file_path": r"C:\Users\sanchita.jain\Downloads\marketo a2a\Marketo_Autonomous_Engine\a2amarketo\marketo_leads_sample_minimal.csv",
+            "format": "csv",
+            "lookup_field": "email"
+        })
+        print("Bulk import leads result:", result)
 
 
 if __name__ == "__main__":

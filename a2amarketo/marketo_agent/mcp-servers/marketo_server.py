@@ -846,6 +846,24 @@ def get_folder_program_contents(
     """
     return agent.get_folder_program_contents(folder_id, folder_type, max_return, offset)
 
+@mcp.tool()
+def bulk_import_leads(file_path: str, format: str = "csv", lookup_field: str = "email", partition_name: str = None, list_id: int = None) -> dict:
+    """
+    Import leads from a file into Marketo.
+
+    Args:
+        file_path: Path to the file containing lead data.
+        format: Import file format (csv, tsv, ssv). Default is csv.
+        lookup_field: Field to use for deduplication. Default is email.
+        partition_name: Name of the lead partition to import to.
+        list_id: ID of the static list to import into.
+
+    Returns:
+        API response with import job details.
+    """
+    return agent.bulk_import_leads(file_path, format, lookup_field, partition_name, list_id)
+
+
 # ------------------------------------------------------------------------------
 # SSE transport and Starlette app (FIXED)
 # ------------------------------------------------------------------------------

@@ -1124,5 +1124,44 @@ class MarketoClient:
             params["offset"] = offset
         
         return self._request("GET", path, params=params)
+    def bulk_import_leads(self, file_path: str, format: str = "csv", lookup_field: str = "email", partition_name: Optional[str] = None, list_id: Optional[int] = None) -> Dict[str, Any]:
+        """Import leads from a file into Marketo.
+        Endpoint: POST /bulk/v1/leads.json
+        
+        Args:
+            file_path: Path to the file containing lead data
+            format: Import file format (csv, tsv, ssv)
+            lookup_field: Field to use for deduplication (default: email)
+            partition_name: Name of the lead partition to import to
+            list_id: ID of the static list to import into
+        
+        Returns:
+            API response with import job details
+        """
+        if format not in ["csv", "tsv", "ssv"]:
+            raise ValueError("format must be one of: csv, tsv, ssv")
+        
+        path = "/bulk/v1/leads.json"
+        params = {"format": format, "lookupField": lookup_field}
+        if partition_name:
+            params["partitionName"] = partition_name
+        if list_id:
+            params["listId"] = list_id
+        
+        with open(file_path, 'rb') as f:
+            files = {'file': f}
+            return self._request_multipart("POST", path, params=params, files=files)
+
+    def _request_multipart(self, method: str, path: str, params: Optional[Dict[str, Any]] = None, files: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Make a multipart/form-data request to Marketo API."""
+        token = self._ensure_token()
+        headers = {"Authorization": f"Bearer {token}"}
+        url = f"{self.rest_base}{path}"
+        
+        resp = requests.request(method, url, headers=headers, params=params, files=files, timeout=15)
+        resp.raise_for_status()
+        return resp.json()
+
+
 
 

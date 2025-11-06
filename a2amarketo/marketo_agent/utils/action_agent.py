@@ -490,3 +490,11 @@ class ActionAgent:
             raise ValueError("offset must be an integer")
         
         return self.client.get_folder_program_contents(folder_id, folder_type, max_return, offset)
+
+    def bulk_import_leads(self, file_path: str, format: str = "csv", lookup_field: str = "email", partition_name: str = None, list_id: int = None) -> Dict[str, Any]:
+        """Import leads from a file into Marketo."""
+        if not file_path or not isinstance(file_path, str):
+            raise ValueError("file_path must be a non-empty string")
+        if format not in ["csv", "tsv", "ssv"]:
+            raise ValueError("format must be one of: csv, tsv, ssv")
+        return self.client.bulk_import_leads(file_path, format, lookup_field, partition_name, list_id)
