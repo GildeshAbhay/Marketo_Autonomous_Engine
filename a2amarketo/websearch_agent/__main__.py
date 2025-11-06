@@ -17,7 +17,9 @@ from google.adk.artifacts import InMemoryArtifactService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
+from shared.config_loader import get_config
 
+deployment_config = get_config()
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
@@ -33,8 +35,11 @@ class MissingAPIKeyError(Exception):
 def main():
     """Starts the agent server."""
     # Docker needs 0.0.0.0 to be accessible from other containers
+    service_name = "websearch_agent"  # or "websearch_agent"
+    # host = deployment_config.get_service_host(service_name)
+    # port = deployment_config.get_service_port(service_name)
     host = os.getenv("HOST", "0.0.0.0")
-    port = int(os.getenv("PORT", "8080"))
+    port = deployment_config.get_service_port(service_name)
     try:
         # Check for API key only if Vertex AI is not configured
         if not os.getenv("GOOGLE_GENAI_USE_VERTEXAI") == "TRUE":
