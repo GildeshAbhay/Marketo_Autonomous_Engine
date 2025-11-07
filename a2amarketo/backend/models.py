@@ -6,6 +6,7 @@ class QueryRequest(BaseModel):
     query: str
     session_id: str
     user_id: Optional[str] = "default_user"
+    file_path: Optional[str] = None  # Add this line for file attachment support
 
 class QueryResponse(BaseModel):
     session_id: str

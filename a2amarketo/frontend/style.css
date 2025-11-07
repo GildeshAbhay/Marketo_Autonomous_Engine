@@ -1166,3 +1166,108 @@ body {
     display: block;
     white-space: pre;
 }
+
+/* File upload button styling */
+/* File upload button styling - improved to match UI */
+.attach-file-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    height: 48px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.attach-file-btn:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    transform: translateY(-2px);
+}
+
+.attach-file-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.attach-file-btn i {
+    font-size: 1.2rem;
+}
+
+/* File upload indicator - improved styling */
+.file-upload-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%);
+    border: 2px solid #90caf9;
+    border-radius: 12px;
+    padding: 10px 16px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #1565c0;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+.file-upload-indicator #file-name {
+    flex: 1;
+    margin-right: 10px;
+    font-weight: 500;
+}
+
+.clear-file-btn {
+    background: rgba(244, 67, 54, 0.1);
+    border: none;
+    color: #d32f2f;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    font-weight: bold;
+}
+
+.clear-file-btn:hover {
+    background: rgba(244, 67, 54, 0.2);
+    transform: scale(1.1);
+}
+
+/* Adjust input-group to accommodate the attach button */
+.input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.input-group #chat-input {
+    flex: 1;
+}

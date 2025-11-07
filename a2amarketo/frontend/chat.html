@@ -67,9 +67,26 @@
             </div>
             
             <div class="chat-input-container">
+                <!-- File upload indicator (shows when file is uploaded) -->
+                <div id="file-upload-indicator" class="file-upload-indicator" style="display: none;">
+                    <span id="file-name"></span>
+                    <button type="button" onclick="clearUploadedFile()" class="clear-file-btn">✕</button>
+                </div>
+                
                 <form id="chat-form" class="chat-form">
                     <div class="input-group">
+                        <!-- Hidden file input -->
+                        <input type="file" id="file-input" accept=".csv,.tsv,.txt" style="display:none" onchange="handleFileUpload(this)">
+                        
+                        <!-- File attach button -->
+                        <button type="button" onclick="document.getElementById('file-input').click()" class="attach-file-btn" title="Attach CSV/TSV file">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        
+                        <!-- Text input -->
                         <input type="text" id="chat-input" placeholder="Ask about campaigns, leads, or marketing automation..." required>
+                        
+                        <!-- Send button -->
                         <button type="submit" class="btn btn-primary send-btn">
                             <i class="fas fa-paper-plane"></i>
                         </button>

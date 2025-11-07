@@ -400,7 +400,7 @@ Return your analysis as a JSON object:
             return "read"
 
     async def stream(
-        self, query: str, session_id: str, user_role: str = "analyst"
+        self, query: str, session_id: str, user_role: str = "analyst", file_path: str = None
     ) -> AsyncIterable[dict[str, Any]]:
         """
         Streams the agent's response to a given query.
@@ -409,6 +409,7 @@ Return your analysis as a JSON object:
             query: User's query
             session_id: Session ID for conversation tracking
             user_role: User's role (admin or analyst) - defaults to analyst for safety
+            file_path: Optional file path for file-based operations (e.g., bulk import)
         """
         session = await self._runner.session_service.get_session(
             app_name=self._agent.name,
@@ -416,8 +417,11 @@ Return your analysis as a JSON object:
             session_id=session_id,
         )
         
-        # Include user role in the query context
+        # Include user role and file path in the query context
         enriched_query = f"[USER_ROLE: {user_role}]\n{query}"
+        if file_path:
+            enriched_query += f"\n[FILE_PATH: {file_path}]"
+        
         content = types.Content(
             role="user", 
             parts=[types.Part.from_text(text=enriched_query)]

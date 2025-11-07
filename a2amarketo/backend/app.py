@@ -34,8 +34,13 @@ from .auth import (
     get_user_by_username, get_user_by_email,require_analyst_or_admin,require_admin
 )
 import json
+from fastapi import UploadFile, File
+import shutil
+from pathlib import Path
 
 nest_asyncio.apply()
+UPLOAD_DIR = Path("./uploaded_files")
+UPLOAD_DIR.mkdir(exist_ok=True)
 # Initialize FastAPI app
 app = FastAPI(title="Marketo A2A Backend", version="1.0.0")
 # CORS
@@ -267,7 +272,7 @@ async def query_agent(
     if not host_agent_instance:
         raise HTTPException(status_code=503, detail="Host agent not initialized")
 
-    # 🆕 Track API usage
+    # Track API usage
     await track_api_usage(
         request=req,
         current_user=current_user,
@@ -277,12 +282,13 @@ async def query_agent(
     )
 
     try:
-        # Call host agent's stream method WITH user role
+        # Call host agent's stream method WITH user role and file_path
         full_response = ""
         async for event in host_agent_instance.stream(
             query=request.query,
             session_id=request.session_id,
-            user_role=current_user.role  # 🆕 Pass user role to host agent
+            user_role=current_user.role,
+            file_path=request.file_path  # Pass file_path if provided
         ):
             if event.get("is_task_complete"):
                 full_response = event.get("content", "")
@@ -334,11 +340,12 @@ async def query_agent_stream(
         try:
             full_response = ""
             
-            # Stream events from host agent
+            # Stream events from host agent with file_path
             async for event in host_agent_instance.stream(
                 query=request.query,
                 session_id=request.session_id,
-                user_role=current_user.role
+                user_role=current_user.role,
+                file_path=request.file_path  # Pass file_path if provided
             ):
                 if event.get("is_task_complete"):
                     full_response = event.get("content", "")
@@ -374,6 +381,62 @@ async def query_agent_stream(
             "X-Accel-Buffering": "no"  # Disable nginx buffering
         }
     )
+
+# ============================================================================
+# FILE UPLOAD ENDPOINT
+# ============================================================================
+
+@app.post("/api/upload-file")
+async def upload_file(
+    file: UploadFile = File(...),
+    current_user: User = Depends(require_analyst_or_admin),
+    req: Request = None
+):
+    """
+    Upload a file (CSV, TSV, etc.) for processing.
+    Saves the file to disk and returns the file path.
+    **Requires authentication.**
+    """
+    try:
+        # Track API usage
+        await track_api_usage(
+            request=req,
+            current_user=current_user,
+            endpoint_type="file_upload"
+        )
+        
+        # Validate file extension
+        file_extension = Path(file.filename).suffix.lower()
+        allowed_extensions = ['.csv', '.tsv', '.txt']
+        if file_extension not in allowed_extensions:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid file type. Allowed: {', '.join(allowed_extensions)}"
+            )
+        
+        # Generate unique filename to avoid conflicts
+        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        unique_filename = f"{current_user.username}_{timestamp}_{file.filename}"
+        file_path = UPLOAD_DIR / unique_filename
+        
+        # Save file to disk
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        print(f"✅ File uploaded by {current_user.username}: {file_path}")
+        
+        return {
+            "success": True,
+            "filename": file.filename,
+            "file_path": str(file_path.absolute()),
+            "size_bytes": file_path.stat().st_size
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error uploading file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error uploading file: {str(e)}")
 
 @app.get("/api/reports/templates")
 async def get_report_templates(current_user: User = Depends(require_analyst_or_admin)):

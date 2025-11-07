@@ -8,6 +8,7 @@ const API_BASE_URL = window.location.hostname === 'localhost'
 let currentUser = null;
 let currentSessionId = generateSessionId();
 let messageCount = 0;
+let uploadedFilePath = null;
 
 // Utility Functions
 function generateSessionId() {
@@ -122,7 +123,8 @@ async function sendChatMessageStream(message, messageDiv) {
             body: JSON.stringify({
                 query: message,
                 session_id: currentSessionId,
-                user_id: currentUser?.id?.toString() || 'default_user'
+                user_id: currentUser?.id?.toString() || 'default_user',
+                file_path: uploadedFilePath
             })
         });
         
@@ -400,6 +402,88 @@ function logout() {
     window.location.href = 'login.html';
 }
 
+// Add file upload handler
+async function handleFileUpload(fileInput) {
+    const file = fileInput.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    const validTypes = ['text/csv', 'text/tab-separated-values', 'text/plain'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    if (!['csv', 'tsv', 'txt'].includes(fileExtension)) {
+        showNotification('Please upload a CSV, TSV, or TXT file', 'error');
+        fileInput.value = '';
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        const accessToken = sessionStorage.getItem('accessToken');
+        
+        showNotification('Uploading file...', 'info');
+        
+        const response = await fetch(`${API_BASE_URL}/upload-file`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: formData
+        });
+        
+        if (response.status === 401) {
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('refreshToken');
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'File upload failed');
+        }
+        
+        const data = await response.json();
+        uploadedFilePath = data.file_path;
+        
+        // Show file upload indicator
+        const fileIndicator = document.getElementById('file-upload-indicator');
+        const fileNameSpan = document.getElementById('file-name');
+        fileNameSpan.textContent = `📎 ${data.filename} (${(data.size_bytes / 1024).toFixed(2)} KB)`;
+        fileIndicator.style.display = 'flex';
+        
+        // Show success notification
+        showNotification(`File uploaded: ${data.filename}`, 'success');
+        
+        // Add system message to chat
+        addChatMessage(`✅ File uploaded successfully: <strong>${data.filename}</strong> (${(data.size_bytes / 1024).toFixed(2)} KB)<br><em>You can now ask me to import these leads.</em>`, false);
+        
+    } catch (error) {
+        console.error('Error uploading file:', error);
+        showNotification('Error uploading file: ' + error.message, 'error');
+        uploadedFilePath = null;
+        fileInput.value = '';
+    }
+}
+
+// Add function to clear uploaded file
+function clearUploadedFile() {
+    uploadedFilePath = null;
+    document.getElementById('file-input').value = '';
+    const fileIndicator = document.getElementById('file-upload-indicator');
+    
+    // Smooth fade out animation
+    fileIndicator.style.animation = 'slideUp 0.3s ease-out';
+    setTimeout(() => {
+        fileIndicator.style.display = 'none';
+        fileIndicator.style.animation = '';
+    }, 300);
+    
+    // Remove the notification - it's too much for auto-clear
+    // showNotification('File cleared', 'info');
+}
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     // Check authentication
@@ -430,6 +514,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             await sendChatMessageStream(message, botMessage);
+            
+            // ✅ AUTO-CLEAR: Clear uploaded file after successful message send
+            if (uploadedFilePath) {
+                clearUploadedFile();
+            }
         } catch (error) {
             // Remove placeholder message on error
             if (!error.message.includes('Permission denied')) {
@@ -439,6 +528,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Permission denied message already shown
                 botMessage.remove();
             }
+            
+            // Don't clear file on error - user might want to retry
         }
     });
     

@@ -22,18 +22,21 @@ def create_agent() -> LlmAgent:
             Your primary responsibility is to help users manage their Marketo instance 
             by providing information about campaigns, smart lists, leads, and other assets.
 
+            **File Upload Support:**
+            When a user query includes [FILE_PATH: /path/to/file.csv], extract the file path
+            and use it with the bulk_import_leads tool. The file path is already saved on 
+            the server and ready to be used.
             
+            **Example:**
+            User: "Import leads from the attached CSV file"
+            Query includes: [FILE_PATH: /uploaded_files/user_20250107_143022_leads.csv]
+            Action: Call bulk_import_leads with file_path="/uploaded_files/user_20250107_143022_leads.csv"
         """,
         tools=[MCPToolset(
                 connection_params=SseServerParams(
                 url=deployment_config.get_service_url("mcp_server") + "/sse",
                 )
                 )],
-        # tools=[MCPToolset(
-        #     connection_params=SseServerParams(
-        #         url="http://localhost:8002/sse",  # Connect to your FastMCP server via HTTP/SSE
-        #     )
-        # )],
     )
 
 
